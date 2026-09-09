@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
+  <defs>
+    <!-- Drop shadow for contrast on light and dark maps -->
+    <filter id="arrow-green-shadow" x="-25%" y="-25%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="2.5" stdDeviation="2.5" flood-color="#000000" flood-opacity="0.45" />
+    </filter>
+  </defs>
+
+  <g filter="url(#arrow-green-shadow)">
+    <!-- Top-Left Facet: Vibrant Emerald Green -->
+    <polygon points="50,4 4,96 50,58" fill="#2ECC71" />
+
+    <!-- Top-Right Facet: Deep Rich Emerald Green -->
+    <polygon points="50,4 50,58 96,96" fill="#0F7644" />
+
+    <!-- Bottom-Left Facet: Medium Green -->
+    <polygon points="4,96 50,78 50,58" fill="#1EAD5D" />
+
+    <!-- Bottom-Right Facet: Dark Forest Green -->
+    <polygon points="50,58 50,78 96,96" fill="#0A522E" />
+
+    <!-- Crisp Center Ridge Highlight -->
+    <line x1="50" y1="4" x2="50" y2="58" stroke="rgba(255, 255, 255, 0.35)" stroke-width="0.8" />
+  </g>
+</svg>

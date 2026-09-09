@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#FF6B35">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>GeoWake — Location-Based Transit & Travel Alarm</title>
+    <meta name="description" content="Wake up when you arrive, not at a fixed time. Minimal, battery-friendly destination alarm for buses, trains, and commutes.">
+
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Leaflet Map CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+    <!-- Theme Controller (Initializes Theme Immediately) -->
+    <script src="js/theme.js"></script>
+
+    <!-- Custom CSS (Transit Theme) -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- ==============================================================
+         PAGE 1: GEOWAKE MINIMAL LANDING & SMART ALARM INTRO
+         ============================================================== -->
+    <div id="view-landing" class="view-container">
+        
+        <!-- Top Warm Orange Hero Section -->
+        <section class="transit-hero-section">
+            <div class="transit-nav-bar">
+                <div class="brand-badge-group">
+                    <div class="brand-bus-icon"><i class="fas fa-location-dot"></i></div>
+                    <div class="brand-text-container">
+                        <span class="brand-text-title">GeoWake</span>
+                        <span class="brand-sub-badge">LOCATION ALARM</span>
+                    </div>
+                </div>
+
+                <div class="transit-nav-actions">
+                    <!-- Saved Trips History -->
+                    <button id="btn-toggle-history-landing" class="btn-auth-nav" title="View Saved Trip History">
+                        <i class="fas fa-clock-rotate-left"></i>
+                        <span>Trip History</span>
+                    </button>
+
+                    <!-- User Account / Sign In Pill (Logged Out State) -->
+                    <button id="btn-open-auth-landing" class="btn-auth-nav btn-auth-trigger" title="Sign In or Register">
+                        <i class="fas fa-user-circle"></i>
+                        <span>Sign In</span>
+                    </button>
+
+                    <!-- User Profile Badge (Logged In State) -->
+                    <div id="user-badge-landing" class="user-nav-badge hidden">
+                        <span class="user-avatar-initial" id="user-initial-landing">U</span>
+                        <span class="user-nav-username" id="user-name-landing">User</span>
+                        <button type="button" class="btn-sign-out" id="btn-sign-out-landing" title="Sign Out">
+                            <i class="fas fa-arrow-right-from-bracket"></i>
+                        </button>
+                    </div>
+
+                    <!-- Theme Toggle -->
+                    <button class="btn-theme-toggle" id="btn-theme-toggle-landing" title="Toggle Light / Dark Mode">
+                        <i class="fas fa-moon theme-icon-dark hidden"></i>
+                        <i class="fas fa-sun theme-icon-light"></i>
+                        <span class="theme-text">LIGHT</span>
+                    </button>
+
+                    <!-- Direct Launch Pill in Nav -->
+                    <button class="btn-nav-launch btn-launch-app" title="Open Alarm Map Cockpit">
+                        <i class="fas fa-location-arrow"></i>
+                        <span>Open App</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Minimal Hero Message (Centered) -->
+            <div class="landing-hero-center landing-hero-body">
+                <div class="hero-eyebrow-pill hero-status-pill">
+                    <span class="pulse-indicator"></span>
+                    <span class="pill-text">📍 LOCATION-BASED SMART ALARM</span>
+                </div>
+                <h1 class="landing-hero-heading landing-hero-title">
+                    Wake Up When You Arrive, <span class="hero-heading-highlight gradient-text">Not at a Fixed Time.</span>
+                </h1>
+                <p class="landing-hero-desc">
+                    Sleep peacefully on trains, buses, and commutes. GeoWake monitors your location in the background and sounds an unmistakable alarm the moment you arrive.
+                </p>
+
+                <div class="hero-actions-group">
+                    <button class="hero-cta-primary btn-launch-app">
+                        <i class="fas fa-location-arrow"></i>
+                        <span>Start Location Alarm</span>
+                    </button>
+                    <a href="#about-geowake" class="hero-cta-secondary" style="text-decoration: none;">
+                        <i class="fas fa-circle-info"></i>
+                        <span>About GeoWake</span>
+                    </a>
+                </div>
+
+                <div class="hero-perks-row">
+                    <span class="hero-perk-item"><i class="fas fa-shield-check"></i> Background GPS Tracking</span>
+                    <span class="hero-perk-item"><i class="fas fa-mobile-screen"></i> Screen-Off Resilient</span>
+                    <span class="hero-perk-item"><i class="fas fa-sliders"></i> 100m – 5km Custom Radius</span>
+                    <span class="hero-perk-item"><i class="fas fa-battery-half"></i> Battery-Adaptive Polling</span>
+                </div>
+            </div>
+
+            <!-- Clean Minimal Quick Destination Bar -->
+            <div class="quick-start-container">
+                <div class="quick-start-card">
+                    <div class="quick-start-input-wrap">
+                        <div class="quick-start-icon">
+                            <i class="fas fa-magnifying-glass-location"></i>
+                        </div>
+                        <div class="quick-start-fields">
+                            <span class="quick-start-label">Quick Set Destination</span>
+                            <input type="text" id="landing-dest-input" class="quick-start-input" placeholder="Where are you heading? (e.g. Ranchi Junction, Airport, City Center)">
+                        </div>
+                    </div>
+                    <button class="quick-start-btn btn-launch-app" id="btn-quick-start-alarm">
+                        <span>Set Alarm</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Minimal Content Flow -->
+        <main class="transit-main-content">
+            
+            <!-- Centered About the Web App Section -->
+            <section class="landing-section-block about-geowake-section" id="about-geowake">
+                <div class="about-card-centered">
+                    <div class="about-header-centered">
+                        <div class="about-badge">
+                            <i class="fas fa-bullseye"></i>
+                            <span>ABOUT THE WEB APP</span>
+                        </div>
+                        <h2 class="about-title">
+                            Location-Based Travel Alarm: <span class="about-title-gradient">Wake Up When You Arrive</span>
+                        </h2>
+                        <div class="about-tagline">
+                            "Wake up when you reach your destination, not at a fixed time."
+                        </div>
+                        <p class="about-lead-text">
+                            GeoWake is built for travelers, commuters, and students who want to sleep peacefully during transit without worrying about missing their stop. Traditional alarms wake you at a predetermined time, but trains and buses frequently experience delays or arrive unexpectedly early. GeoWake replaces clock-based guesswork with smart background GPS geofencing—calculating your real-time distance and triggering a loud, persistent alarm the moment you cross your chosen arrival radius.
+                        </p>
+                    </div>
+
+                    <!-- 4 Core Pillars Grid -->
+                    <div class="about-pillars-grid">
+                        <div class="about-pillar-card">
+                            <div class="about-pillar-icon">
+                                <i class="fas fa-map-location-dot"></i>
+                            </div>
+                            <div class="about-pillar-content">
+                                <h3 class="about-pillar-title">Customizable Alert Perimeter</h3>
+                                <p class="about-pillar-desc">
+                                    Search any railway station, bus terminal, or drop a pin on the map. Choose your preferred wake-up boundary from 100 meters up to 5 kilometers.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="about-pillar-card">
+                            <div class="about-pillar-icon">
+                                <i class="fas fa-battery-three-quarters"></i>
+                            </div>
+                            <div class="about-pillar-content">
+                                <h3 class="about-pillar-title">Battery-Adaptive Tracking</h3>
+                                <p class="about-pillar-desc">
+                                    Conserves battery on long trips with intelligent adaptive polling: low frequency while far away, seamlessly transitioning to high-precision GPS as you approach.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="about-pillar-card">
+                            <div class="about-pillar-icon">
+                                <i class="fas fa-shield-virus"></i>
+                            </div>
+                            <div class="about-pillar-content">
+                                <h3 class="about-pillar-title">Anti-False Alarm Filtering</h3>
+                                <p class="about-pillar-desc">
+                                    Built-in accuracy hysteresis and jump rejection prevent rogue GPS glitches or satellite drift from triggering accidental wake-ups mid-journey.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="about-pillar-card">
+                            <div class="about-pillar-icon">
+                                <i class="fas fa-bell-slash"></i>
+                            </div>
+                            <div class="about-pillar-content">
+                                <h3 class="about-pillar-title">Screen-Locked Persistent Audio</h3>
+                                <p class="about-pillar-desc">
+                                    Engineered to wake deep sleepers through loud synthesized alarms and continuous vibration that persist until you physically wake up and dismiss the alert.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Journey Example Callout -->
+                    <div class="about-example-callout">
+                        <i class="fas fa-train-subway"></i>
+                        <span>
+                            <strong>Real-World Example:</strong> Traveling by train on an overnight journey? Set your destination to your arrival station with a <strong>500m perimeter</strong>. Lock your phone, sleep peacefully, and GeoWake sounds the alert before your stop!
+                        </span>
+                    </div>
+
+                    <!-- Centered Action Buttons -->
+                    <div class="about-cta-center">
+                        <button class="hero-cta-primary btn-launch-app">
+                            <i class="fas fa-location-arrow"></i>
+                            <span>Launch Alarm Cockpit</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- How GeoWake Works (3 Minimal Cards) -->
+            <section class="landing-section-block">
+                <div class="section-headline-bar">
+                    <h2 class="section-title">
+                        <i class="fas fa-compass" style="color: var(--accent-primary);"></i>
+                        <span>How GeoWake Works</span>
+                    </h2>
+                    <span class="section-sub-badge">3 Simple Steps</span>
+                </div>
+
+                <div class="how-it-works-grid">
+                    <!-- Step 1 -->
+                    <div class="step-minimal-card">
+                        <div class="step-card-header">
+                            <div class="step-icon-badge">
+                                <i class="fas fa-map-pin"></i>
+                            </div>
+                            <span class="step-number">01</span>
+                        </div>
+                        <h3 class="step-title">Set Destination</h3>
+                        <p class="step-desc">
+                            Search your train station, bus stop, or drop a pin directly on the live map. Choose your wake-up perimeter from 100m up to 2km.
+                        </p>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="step-minimal-card">
+                        <div class="step-card-header">
+                            <div class="step-icon-badge">
+                                <i class="fas fa-bed"></i>
+                            </div>
+                            <span class="step-number">02</span>
+                        </div>
+                        <h3 class="step-title">Sleep & Relax</h3>
+                        <p class="step-desc">
+                            Lock your phone and sleep soundly. High-efficiency GPS tracking continuously monitors your remaining distance in the background.
+                        </p>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="step-minimal-card">
+                        <div class="step-card-header">
+                            <div class="step-icon-badge">
+                                <i class="fas fa-bell"></i>
+                            </div>
+                            <span class="step-number">03</span>
+                        </div>
+                        <h3 class="step-title">Wake Up on Arrival</h3>
+                        <p class="step-desc">
+                            The moment your vehicle enters your alert boundary, GeoWake triggers an instant loud audio alarm and vibration before you reach the stop.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sound Preview & Options Card -->
+            <section class="landing-section-block">
+                <div class="transit-preview-card">
+                    <div class="preview-badge-header">
+                        <i class="fas fa-volume-high" style="color: var(--accent-primary);"></i>
+                        <span>Test Alarm Tones</span>
+                    </div>
+                    <p class="preview-card-desc">Preview our loud synthesized alert tones designed to wake heavy sleepers on moving transit.</p>
+                    <div class="sound-pills-row">
+                        <button class="sound-pill" onclick="window.soundEngine.playLoudAlarm(false)">
+                            <i class="fas fa-play"></i> Loud Alarm
+                        </button>
+                        <button class="sound-pill" onclick="window.soundEngine.playDigitalSiren(false)">
+                            <i class="fas fa-play"></i> Digital Siren
+                        </button>
+                        <button class="sound-pill" onclick="window.soundEngine.playTrainChime(false)">
+                            <i class="fas fa-play"></i> Train Chime
+                        </button>
+                        <button class="sound-pill" onclick="window.soundEngine.playRadarPulse(false)">
+                            <i class="fas fa-play"></i> Radar Pulse
+                        </button>
+                        <button class="sound-pill pill-stop" onclick="window.soundEngine.stopAlarm()">
+                            <i class="fas fa-stop"></i> Stop
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Minimal Clean Footer -->
+            <footer class="transit-footer-minimal">
+                <div class="footer-brand-info">
+                    <div class="footer-logo">
+                        <i class="fas fa-location-dot" style="color: var(--accent-primary);"></i>
+                        <span>GeoWake</span>
+                    </div>
+                    <p class="footer-copy">Wake up when you reach your destination, not at a fixed time.</p>
+                </div>
+                <div class="footer-action-links">
+                    <button class="footer-cta-btn btn-launch-app">
+                        <i class="fas fa-location-arrow"></i>
+                        <span>Open Alarm Cockpit</span>
+                    </button>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <!-- ==============================================================
+         PAGE 2: "TRACK YOUR BUS" COCKPIT / MAP (RIGHT REFERENCE SCREEN)
+         ============================================================== -->
+    <div id="view-app" class="view-container hidden">
+        
+        <!-- Top App Bar (Back Arrow + "Track your trip") -->
+        <header class="app-transit-header">
+            <div class="app-transit-nav-left">
+                <button id="btn-back-home" class="btn-transit-back" title="Back to Routes">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <h1 class="track-bus-title">Track your trip</h1>
+            </div>
+
+            <div class="app-transit-nav-right">
+                <button id="btn-toggle-history" class="icon-round-btn" title="View History">
+                    <i class="fas fa-clock-rotate-left"></i>
+                </button>
+
+                <!-- User Account / Sign In Pill (Logged Out State) -->
+                <button id="btn-open-auth-app" class="btn-auth-nav btn-auth-trigger" title="Sign In or Register">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Sign In</span>
+                </button>
+
+                <!-- User Profile Badge (Logged In State) -->
+                <div id="user-badge-app" class="user-nav-badge hidden">
+                    <span class="user-avatar-initial" id="user-initial-app">U</span>
+                    <span class="user-nav-username" id="user-name-app">User</span>
+                    <button type="button" class="btn-sign-out" id="btn-sign-out-app" title="Sign Out">
+                        <i class="fas fa-arrow-right-from-bracket"></i>
+                    </button>
+                </div>
+
+                <!-- Theme Switcher -->
+                <button class="btn-theme-toggle" id="btn-theme-toggle-app" title="Toggle Theme">
+                    <i class="fas fa-moon theme-icon-dark hidden"></i>
+                    <i class="fas fa-sun theme-icon-light"></i>
+                    <span class="theme-text">LIGHT</span>
+                </button>
+
+                <span class="badge badge-cyan" id="app-status-badge">
+                    <i class="fas fa-location-crosshairs"></i> GPS Ready
+                </span>
+            </div>
+        </header>
+
+        <!-- Main App Container -->
+        <main class="app-workspace">
+            <div class="app-layout-grid">
+                
+                <!-- LEFT PANEL: TRANSIT CONTROLLER & SETTINGS -->
+                <div class="trip-controller-card">
+                    <div class="card-header-clean">
+                        <div class="card-title"><i class="fas fa-sliders" style="color: var(--accent-primary);"></i> Trip Settings</div>
+                        <span class="badge badge-cyan" id="app-device-status-badge">Standby</span>
+                    </div>
+
+                    <!-- Mode Switch Tabs -->
+                    <div class="tracking-mode-nav">
+                        <button class="mode-tab-btn active" id="mode-btn-live" data-mode="live">
+                            <i class="fas fa-satellite-dish"></i> Live GPS
+                        </button>
+                        <button class="mode-tab-btn" id="mode-btn-sim" data-mode="sim">
+                            <i class="fas fa-bus"></i> Route Sim
+                        </button>
+                    </div>
+
+                    <!-- Live GPS Bar -->
+                    <div class="live-location-card" id="live-location-card">
+                        <div class="live-location-meta">
+                            <div class="live-beacon-status">
+                                <span class="live-radar-dot" id="live-radar-indicator"></span>
+                                <span id="live-gps-status-label">Live GPS: Active</span>
+                            </div>
+                            <div class="live-gps-stats-mini">
+                                <span><i class="fas fa-crosshairs"></i> <strong id="live-stat-coords">--</strong></span>
+                                <span><i class="fas fa-satellite"></i> <strong id="live-stat-accuracy">±12m</strong></span>
+                            </div>
+                        </div>
+                        <button id="btn-locate-me" class="btn-locate-action" title="Fetch GPS Location">
+                            <i class="fas fa-crosshairs"></i> Locate
+                        </button>
+                    </div>
+
+                    <!-- Trip Setup Form -->
+                    <div id="setup-card-panel">
+                        <!-- Step 1: Destination -->
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Destination</span>
+                                <span style="font-size: 0.72rem; color: var(--text-muted); text-transform: none;">Click map or search</span>
+                            </div>
+                            <div class="search-input-wrapper">
+                                <i class="fas fa-magnifying-glass"></i>
+                                <input type="text" id="dest-search-input" class="search-input" placeholder="Search station, landmark, pub...">
+                            </div>
+                            <div id="search-results-dropdown" class="search-dropdown hidden"></div>
+                        </div>
+
+                        <!-- Selected Destination Card -->
+                        <div class="selected-dest-card" id="selected-dest-card">
+                            <div class="dest-details">
+                                <div class="dest-name" id="current-dest-name">Bernard Pub (Prague)</div>
+                                <div class="dest-coords" id="current-dest-coords">23.35180, 85.33780</div>
+                            </div>
+                            <div class="dest-actions-wrap">
+                                <button id="btn-remove-dest" class="btn-remove-dest" title="Remove Destination">
+                                    <i class="fas fa-trash-can"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Travel Path & ETA Ticket Summary Card -->
+                        <div class="travel-path-summary-card" id="travel-path-summary-card">
+                            <div class="path-summary-header">
+                                <span class="path-title"><i class="fas fa-route" style="color: var(--accent-primary);"></i> Route Summary</span>
+                                <span class="badge badge-cyan" id="path-routing-status"><i class="fas fa-compass"></i> Route Active</span>
+                            </div>
+                            <div class="path-summary-grid">
+                                <div class="path-summary-item">
+                                    <span class="item-lbl">Distance</span>
+                                    <span class="item-val" id="path-distance-val">15 km</span>
+                                </div>
+                                <div class="path-summary-item">
+                                    <span class="item-lbl">Travel Time</span>
+                                    <span class="item-val highlight" id="path-duration-val">15 min</span>
+                                </div>
+                                <div class="path-summary-item">
+                                    <span class="item-lbl">Est. Arrival</span>
+                                    <span class="item-val" id="path-eta-val">16:25</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Empty Destination State -->
+                        <div class="no-dest-card hidden" id="no-dest-card">
+                            <i class="fas fa-map-pin" style="color: var(--text-muted); font-size: 1.2rem;"></i>
+                            <div class="no-dest-info">
+                                <div class="no-dest-title">No Destination Selected</div>
+                                <div class="no-dest-hint">Click on the map or search above</div>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Radius -->
+                        <div class="input-group" style="margin-top: 6px;">
+                            <div class="input-label">
+                                <span>Alert Radius</span>
+                                <span id="active-radius-display" style="color: var(--accent-primary); font-weight: 700;">500 m</span>
+                            </div>
+                            <div class="radius-buttons-grid">
+                                <button class="radius-btn" data-radius="100">100m</button>
+                                <button class="radius-btn" data-radius="300">300m</button>
+                                <button class="radius-btn active" data-radius="500">500m</button>
+                                <button class="radius-btn" data-radius="1000">1 km</button>
+                                <button class="radius-btn" data-radius="2000">2 km</button>
+                                <button class="radius-btn" data-radius="5000">5 km</button>
+                            </div>
+                            <input type="range" id="custom-radius-slider" min="50" max="10000" step="50" value="500" class="minimal-slider">
+                            <span id="custom-radius-val" class="hidden">500 m</span>
+                        </div>
+
+                        <!-- Step 3: Alarm Tone -->
+                        <div class="input-group" style="margin-top: 6px;">
+                            <div class="input-label">Alarm Sound</div>
+                            <div class="sound-pills-row" style="justify-content: flex-start;">
+                                <div class="sound-pill-opt selected" data-sound="loud">Loud Alarm</div>
+                                <div class="sound-pill-opt" data-sound="siren">Digital Siren</div>
+                                <div class="sound-pill-opt" data-sound="chime">Train Chime</div>
+                                <div class="sound-pill-opt" data-sound="radar">Radar Pulse</div>
+                            </div>
+                        </div>
+
+                        <!-- Big Orange Start Button (Matches "BUY TICKET / CALL DRIVER") -->
+                        <button id="btn-start-trip" class="btn-primary-action">
+                            <i class="fas fa-bell"></i> Start Destination Alarm
+                        </button>
+                    </div>
+
+                    <!-- Active Trip Dashboard (Shown when alarm is monitoring) -->
+                    <div id="active-trip-panel" class="active-trip-card hidden">
+                        <div class="active-trip-header">
+                            <div class="trip-live-indicator">
+                                <div class="pulse-dot-green"></div>
+                                <span id="active-tracking-mode-badge">TRACKING ACTIVE</span>
+                            </div>
+                            <span class="badge badge-cyan" id="active-battery-tier">Adaptive (60s)</span>
+                        </div>
+
+                        <div class="active-trip-main-stat">
+                            <div class="label">Distance to Stop</div>
+                            <div class="big-distance" id="active-distance-val">-- km</div>
+                            <div class="active-trip-progress-bar">
+                                <div class="progress-fill" id="trip-progress-fill"></div>
+                            </div>
+                        </div>
+
+                        <div class="active-trip-grid">
+                            <div class="grid-stat-box">
+                                <div class="box-title">Speed</div>
+                                <div class="box-val" id="active-speed-val">0 km/h</div>
+                            </div>
+                            <div class="grid-stat-box">
+                                <div class="box-title">Accuracy</div>
+                                <div class="box-val" id="active-accuracy-val">±12 m</div>
+                            </div>
+                            <div class="grid-stat-box">
+                                <div class="box-title">ETA</div>
+                                <div class="box-val" id="active-eta-val">--</div>
+                            </div>
+                            <div class="grid-stat-box">
+                                <div class="box-title">Threshold</div>
+                                <div class="box-val" style="color: var(--accent-primary);">Within 500m</div>
+                            </div>
+                        </div>
+
+                        <button id="btn-stop-trip" class="btn-stop-trip">
+                            <i class="fas fa-circle-stop"></i> Stop Alarm
+                        </button>
+                    </div>
+                </div>
+
+                <!-- RIGHT PANEL: LEAFLET MAP & SIMULATOR BAR (RIGHT REFERENCE SCREEN) -->
+                <div class="map-workspace-card">
+                    <!-- Preset Route Toolbar -->
+                    <div class="cockpit-toolbar" id="cockpit-sim-toolbar">
+                        <div class="preset-dropdown-wrap">
+                            <label style="font-size: 0.8rem; color: var(--text-muted); margin-right: 6px; font-weight: 600;"><i class="fas fa-route" style="color: var(--accent-primary);"></i> Corridor:</label>
+                            <select id="journey-preset-select">
+                                <option value="ran-tat">Pod Karlovem ➔ Bernard Pub (15 km)</option>
+                                <option value="ran-pat">Patna ➔ Ranchi (Vande Bharat - 380 km)</option>
+                                <option value="ran-dhn">Dhanbad ➔ Ranchi Junction (160 km)</option>
+                                <option value="ran-kol">Howrah ➔ Ranchi Junction (420 km)</option>
+                                <option value="blr-chn">Chennai ➔ Bangalore (340 km)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Leaflet Canvas with Floating Pill & Controls -->
+                    <div class="map-wrapper-relative">
+                        <div id="interactive-map"></div>
+                        
+                        <!-- Floating Route Stats Pill (Matches Screenshot Top Badge) -->
+                        <div class="map-floating-route-badge" id="map-route-badge">
+                            <i class="fas fa-bus" style="color: var(--accent-primary);"></i>
+                            <span>Time: <strong id="map-badge-time">15 min</strong></span>
+                            <span class="route-badge-divider">•</span>
+                            <span id="map-badge-dist">15 km</span>
+                        </div>
+
+                        <!-- Floating Action Buttons -->
+                        <div class="map-floating-controls">
+                            <button id="btn-map-zoom-in" class="map-fab-btn" title="Zoom In (+)">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <button id="btn-map-zoom-out" class="map-fab-btn" title="Zoom Out (-)">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button id="btn-map-recenter" class="map-fab-btn" title="Center on Vehicle">
+                                <i class="fas fa-crosshairs"></i>
+                            </button>
+                            <button id="btn-toggle-follow" class="map-fab-btn" title="Auto-Follow Vehicle">
+                                <i class="fas fa-video"></i>
+                            </button>
+                            <button id="btn-map-layer" class="map-fab-btn" title="Switch Map Layer">
+                                <i class="fas fa-layer-group"></i>
+                            </button>
+                            <button id="btn-map-clear-dest" class="map-fab-btn danger-fab" title="Clear Destination">
+                                <i class="fas fa-trash-can"></i>
+                            </button>
+                            <button id="btn-map-fit" class="map-fab-btn" title="Fit Entire Route">
+                                <i class="fas fa-route"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Live Auto-Movement & Simulation Bar -->
+                    <div class="auto-move-panel">
+                        <div class="auto-move-header">
+                            <div class="auto-move-title-wrap">
+                                <span class="auto-move-title"><i class="fas fa-bus"></i> Transit Simulation & Testing</span>
+                                <div class="sim-speed-minimal-pills">
+                                    <span style="font-size: 0.72rem; color: var(--text-muted); margin-left: 6px;">Speed:</span>
+                                    <button class="sim-speed-btn" data-speed="1">1x</button>
+                                    <button class="sim-speed-btn" data-speed="5">5x</button>
+                                    <button class="sim-speed-btn active" data-speed="20">20x</button>
+                                    <button class="sim-speed-btn" data-speed="80">80x</button>
+                                </div>
+                            </div>
+                            <div class="auto-move-actions">
+                                <button id="btn-auto-move" class="btn-auto-move-play">
+                                    <i class="fas fa-play"></i> Auto-Move
+                                </button>
+                                <button id="btn-step-forward" class="btn-step-action" title="Move 500m closer">
+                                    +500m
+                                </button>
+                                <button id="btn-jump-inside-radius" class="btn-jump-radius-action" title="Jump inside alert radius">
+                                    <i class="fas fa-bullseye"></i> Inside Radius
+                                </button>
+                            </div>
+                        </div>
+                        <div class="auto-move-slider-wrap">
+                            <input type="range" id="auto-move-slider" min="0" max="100" step="1" value="0">
+                        </div>
+                    </div>
+
+                    <!-- Telemetry & Diagnostics Bar -->
+                    <div class="telemetry-bar-clean">
+                        <div class="tele-item">Dist: <strong id="dbg-dist">-- m</strong></div>
+                        <div class="tele-item">Accuracy: <strong id="dbg-accuracy">±12m</strong></div>
+                        <div class="tele-item">Speed: <span id="live-motion-badge" class="tele-motion-badge"><strong id="live-stat-speed">0 km/h</strong> (Stationary)</span></div>
+                        <div class="tele-item">Lat/Lon: <strong id="dbg-lat">23.3518</strong>, <strong id="dbg-lon">85.3378</strong></div>
+                        <div class="tele-item">Status: <strong id="dbg-status-note" style="color: var(--transit-green);">Nominal</strong></div>
+                    </div>
+
+                    <!-- Hidden developer hooks for system compatibility -->
+                    <div class="hidden">
+                        <span id="dbg-consecutive-hits">0 / 2</span>
+                        <span id="dbg-jump-rejections">0</span>
+                        <button id="btn-inject-jump"></button>
+                        <button id="btn-inject-degraded"></button>
+                        <button id="btn-inject-blackout"></button>
+                        <button id="btn-jump-near"></button>
+                        <button id="btn-test-trigger"></button>
+                        <button id="btn-sim-play"></button>
+                        <div id="telemetry-terminal-output"><div class="log-line">[Service] Ready.</div></div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- TRIP DESTINATION HISTORY MODAL -->
+    <div id="history-modal" class="history-modal hidden">
+        <div class="history-modal-card">
+            <div class="history-modal-header">
+                <div class="history-modal-title">
+                    <i class="fas fa-clock-rotate-left" style="color: var(--accent-primary);"></i> Trip History
+                </div>
+                <button id="btn-close-history" class="btn-close-modal" title="Close">
+                    <i class="fas fa-xmark"></i>
+                </button>
+            </div>
+            <div id="trip-history-list" class="history-modal-body">
+                <!-- Populated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- SIMPLE USERNAME & PASSWORD AUTHENTICATION MODAL -->
+    <div id="simple-auth-modal" class="auth-modal hidden">
+        <div class="auth-modal-card">
+            <div class="auth-modal-header">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-user-circle" style="font-size: 1.3rem; color: var(--accent-primary);"></i>
+                    <span style="font-weight: 800; font-family: var(--font-heading); color: var(--text-primary); font-size: 1.05rem;">Account Access</span>
+                </div>
+                <button id="btn-close-simple-auth" class="btn-close-modal" title="Close">
+                    <i class="fas fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="auth-modal-body">
+                <!-- Auth Tabs (Sign In / Create Account) -->
+                <div class="auth-tab-switch">
+                    <button type="button" class="auth-tab-btn active" id="tab-btn-login">Sign In</button>
+                    <button type="button" class="auth-tab-btn" id="tab-btn-register">Create Account</button>
+                </div>
+
+                <!-- Status alert banner -->
+                <div id="auth-alert-box" class="auth-status hidden" role="alert"></div>
+
+                <!-- Sign In Form -->
+                <form id="form-auth-login" class="auth-simple-form">
+                    <div class="auth-field-group">
+                        <label for="login-username"><i class="fas fa-user"></i> Username</label>
+                        <input type="text" id="login-username" name="username" placeholder="Enter username" autocomplete="username" required>
+                    </div>
+                    <div class="auth-field-group">
+                        <label for="login-password"><i class="fas fa-lock"></i> Password</label>
+                        <input type="password" id="login-password" name="password" placeholder="Enter password" autocomplete="current-password" required>
+                    </div>
+
+                    <!-- Remember Me Option -->
+                    <div class="auth-options-row">
+                        <label class="remember-me-toggle" for="login-remember-me">
+                            <input type="checkbox" id="login-remember-me" name="rememberMe" checked>
+                            <span class="custom-checkbox"><i class="fas fa-check"></i></span>
+                            <span class="remember-me-text">Remember me</span>
+                        </label>
+                        <span class="remember-me-badge" id="remember-me-status-badge" title="Enabled: Stay logged in across restarts. Disabled: Log out when you close the app.">
+                            <i class="fas fa-shield-halved"></i> Stay Signed In
+                        </span>
+                    </div>
+
+                    <button type="submit" class="btn-auth-submit" id="btn-submit-login">
+                        <i class="fas fa-arrow-right-to-bracket"></i> Sign In
+                    </button>
+                </form>
+
+                <!-- Register Form -->
+                <form id="form-auth-register" class="auth-simple-form hidden">
+                    <div class="auth-field-group">
+                        <label for="reg-username"><i class="fas fa-user-plus"></i> Choose Username</label>
+                        <input type="text" id="reg-username" name="username" placeholder="e.g. aryan_24" autocomplete="username" required>
+                        <span class="auth-field-hint">At least 3 characters (letters, numbers, underscores)</span>
+                    </div>
+                    <div class="auth-field-group">
+                        <label for="reg-name"><i class="fas fa-id-card"></i> Your Name (Optional)</label>
+                        <input type="text" id="reg-name" name="name" placeholder="e.g. Aryan" autocomplete="name">
+                    </div>
+                    <div class="auth-field-group">
+                        <label for="reg-password"><i class="fas fa-lock"></i> Choose Password</label>
+                        <input type="password" id="reg-password" name="password" placeholder="e.g. Secure#2026" autocomplete="new-password" required>
+                        <span class="auth-field-hint">Must contain at least 1 capital letter, 1 number, and 1 special character</span>
+                    </div>
+
+                    <div class="auth-options-row">
+                        <label class="remember-me-toggle" for="reg-remember-me">
+                            <input type="checkbox" id="reg-remember-me" name="rememberMe" checked>
+                            <span class="custom-checkbox"><i class="fas fa-check"></i></span>
+                            <span class="remember-me-text">Remember me on this device</span>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn-auth-submit" id="btn-submit-register">
+                        <i class="fas fa-check"></i> Create Account
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- FULL SCREEN WAKE-UP ALARM MODAL -->
+    <div id="fullscreen-alarm-overlay" class="fullscreen-alarm-modal hidden">
+        <div class="alarm-content-box">
+            <div class="alarm-icon-beacon"><i class="fas fa-bell"></i></div>
+            <div class="alarm-title">WAKE UP!</div>
+            <div style="font-size: 1rem; color: var(--text-secondary); margin-bottom: 4px;">You have arrived near:</div>
+            <div class="alarm-destination-name" id="alarm-dest-name">Bernard Pub (Prague)</div>
+            <div class="alarm-dist-caption" id="alarm-dest-distance">Within 500 meters of destination</div>
+            
+            <div class="alarm-modal-actions">
+                <button id="btn-dismiss-alarm" class="btn-stop-alarm-huge">
+                    <i class="fas fa-stop"></i> STOP ALARM
+                </button>
+                <button id="btn-snooze-alarm" class="btn-snooze-alarm">
+                    <i class="fas fa-clock"></i> Snooze 2 Min
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <!-- Scripts -->
+    <script src="js/audio.js"></script>
+    <script src="js/cloud-db.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/telemetry.js"></script>
+    <script src="js/geolocation.js"></script>
+    <script src="js/map.js"></script>
+    <script src="js/simulator.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+# Environment variables and secrets
+.env
+.env.local
+.env.*.local
+
+# SQLite Database & user credentials
+*.db
+geowake.db
+
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+
+# OS & IDE files
+.DS_Store
+Thumbs.db
+.vscode/
