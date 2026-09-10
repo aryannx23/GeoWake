@@ -493,6 +493,13 @@ class GeoWakeRequestHandler(SimpleHTTPRequestHandler):
         elif parsed.path == '/api/user/trips':
             trip_id = data.get('id') or ('trip-' + str(abs(hash(str(os.urandom(8))))))
             user_id = data.get('userId') or 'local-user'
+            if user_id == 'guest' or str(user_id).startswith('guest'):
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({'success': True, 'message': 'Guest trip not saved to database.'}).encode('utf-8'))
+                return
+
             dest_name = data.get('destinationName', 'Destination')
             dest_full = data.get('destinationFullName', '')
             dest_lat = data.get('destLat')

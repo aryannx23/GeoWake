@@ -113,6 +113,10 @@ class CloudDatabaseEngine {
      * Save trip to Cloud Database
      */
     async saveTripOnline(trip) {
+        if (!trip || trip.userId === 'guest' || window.authManager?.isGuest?.()) {
+            return { success: true, guest: true };
+        }
+
         const payload = {
             ...trip,
             syncedAt: new Date().toISOString()

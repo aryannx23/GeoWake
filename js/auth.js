@@ -464,10 +464,51 @@ class AuthManager {
         return !!this.currentUser;
     }
 
+    isGuest() {
+        return Boolean(this.currentUser && this.currentUser.isGuest);
+    }
+
+    /**
+     * Guest Login - Transient in-memory session.
+     * Login data, credentials, and trip history are never saved.
+     */
+    loginAsGuest() {
+        const guestUser = {
+            id: 'guest',
+            username: 'Guest',
+            name: 'Guest Traveler',
+            isGuest: true,
+            mode: 'guest'
+        };
+
+        // Do NOT store in localStorage, sessionStorage, or SQLite database
+        this.currentUser = guestUser;
+        this.sessionToken = null;
+        this.isRemembered = false;
+
+        // Clear any old stored sessions so guest is strictly ephemeral
+        try {
+            localStorage.removeItem(this.STORAGE_KEY);
+            localStorage.removeItem(this.SESSION_TOKEN_KEY);
+            localStorage.removeItem(this.REMEMBER_ME_KEY);
+            sessionStorage.removeItem(this.STORAGE_KEY);
+            sessionStorage.removeItem(this.SESSION_TOKEN_KEY);
+            sessionStorage.removeItem(this.REMEMBER_ME_KEY);
+        } catch (e) {}
+
+        this.notifyListeners();
+        return guestUser;
+    }
+
     /**
      * Save Trip record to SQLite & Online Cloud Database
      */
     async saveTripToDatabase(tripData) {
+        // Privacy rule: Guest trips are never saved to database or cloud
+        if (this.isGuest()) {
+            return;
+        }
+
         const payload = {
             id: 'trip-' + Date.now(),
             userId: this.currentUser ? this.currentUser.id : 'local-user',
@@ -507,6 +548,7 @@ class AuthManager {
      * Fetch User Trips from SQLite
      */
     async fetchUserTripsFromDb(userId = null) {
+        if (this.isGuest()) return;
         const targetUserId = userId || (this.currentUser ? this.currentUser.id : null);
         const base = this.getApiBase();
         const url = targetUserId ? `${base}/api/user/trips?userId=${encodeURIComponent(targetUserId)}` : `${base}/api/user/trips`;

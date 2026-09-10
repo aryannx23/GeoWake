@@ -8,7 +8,7 @@ class MapManager {
     constructor() {
         this.map = null;
         this.currentTileLayer = null;
-        this.tileLayerName = 'streets'; // 'streets' | 'satellite'
+        this.tileLayerName = 'satellite'; // 'satellite' | 'streets'
         this.tileLayers = {};
 
         this.userMarker = null;
@@ -44,20 +44,27 @@ class MapManager {
         });
 
         // 1. Define Free Leaflet Tile Layers (No API Key Required)
+        // High-resolution Esri World Imagery + reference places and boundaries overlay
         this.tileLayers = {
+            satellite: L.layerGroup([
+                L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                    maxZoom: 19,
+                    attribution: '&copy; <a href="https://www.esri.com/">Esri</a> &mdash; Satellite Imagery'
+                }),
+                L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+                    maxZoom: 19,
+                    attribution: ''
+                })
+            ]),
             streets: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 19,
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }),
-            satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-                maxZoom: 18,
-                attribution: '&copy; <a href="https://www.esri.com/">Esri</a>'
             })
         };
 
-        // Default to standard OpenStreetMap layer
-        this.tileLayerName = 'streets';
-        this.currentTileLayer = this.tileLayers.streets;
+        // Always default to Satellite layer
+        this.tileLayerName = 'satellite';
+        this.currentTileLayer = this.tileLayers.satellite;
         this.currentTileLayer.addTo(this.map);
 
         // 2. Add Standard Leaflet Zoom Control to bottom-right
@@ -109,7 +116,7 @@ class MapManager {
     }
 
     toggleTileLayer() {
-        const order = ['streets', 'satellite'];
+        const order = ['satellite', 'streets'];
         const nextIdx = (order.indexOf(this.tileLayerName) + 1) % order.length;
         this.setTileLayer(order[nextIdx]);
         return order[nextIdx];

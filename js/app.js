@@ -93,10 +93,15 @@ class GeoWakeApp {
             });
         }
 
-        // Check initial URL hash and set active page view (Direct access)
+        // Check initial URL hash and set active page view (Direct access with Auth Guard)
         const initialHash = window.location.hash.toLowerCase();
         if (initialHash === '#app' || initialHash === '#/app') {
-            this.navigateToView('app', false);
+            if (this.isUserAuthenticated()) {
+                this.navigateToView('app', false);
+            } else {
+                this.navigateToView('landing', false);
+                this.showAuthRequiredNotice('Please sign in or continue as Guest to access the GeoWake app.');
+            }
         } else {
             this.navigateToView('landing', false);
         }
@@ -214,7 +219,20 @@ class GeoWakeApp {
     }
 
     isUserAuthenticated() {
-        return true;
+        return Boolean(window.authManager && window.authManager.isLoggedIn());
+    }
+
+    showAuthRequiredNotice(message = 'Please sign in or continue as Guest to access the GeoWake app.') {
+        const authModal = document.getElementById('simple-auth-modal');
+        const authAlertBox = document.getElementById('auth-alert-box');
+        if (authModal) {
+            authModal.classList.remove('hidden');
+            if (authAlertBox) {
+                authAlertBox.className = 'auth-status info';
+                authAlertBox.innerHTML = `<i class="fas fa-lock"></i> ${message}`;
+                authAlertBox.classList.remove('hidden');
+            }
+        }
     }
 
     navigateToView(viewName, updateHash = true) {
@@ -222,6 +240,15 @@ class GeoWakeApp {
         const viewApp = document.getElementById('view-app');
 
         if (viewName === 'app') {
+            // Strict Auth Guard: Do not allow unauthenticated users into app view
+            if (!this.isUserAuthenticated()) {
+                if (viewApp) viewApp.classList.add('hidden');
+                if (viewLanding) viewLanding.classList.remove('hidden');
+                if (updateHash) history.replaceState(null, '', '#home');
+                this.showAuthRequiredNotice('Please sign in or continue as Guest to access the GeoWake app.');
+                return;
+            }
+
             if (viewLanding) viewLanding.classList.add('hidden');
             if (viewApp) viewApp.classList.remove('hidden');
             if (updateHash) history.pushState(null, '', '#app');
@@ -295,8 +322,13 @@ class GeoWakeApp {
                 const query = landingDestInput ? landingDestInput.value.trim() : '';
                 if (query) this.pendingSearchQuery = query;
 
+                if (!this.isUserAuthenticated()) {
+                    this.showAuthRequiredNotice('Please sign in or continue as Guest to start your alarm.');
+                    return;
+                }
+
                 this.navigateToView('app');
-                if (this.isUserAuthenticated() && query && query.length >= 2) {
+                if (query && query.length >= 2) {
                     const searchInput = document.getElementById('dest-search-input');
                     if (searchInput) {
                         searchInput.value = query;
@@ -317,6 +349,11 @@ class GeoWakeApp {
                     e.preventDefault();
                     const query = landingDestInputEl.value.trim();
                     if (query) this.pendingSearchQuery = query;
+
+                    if (!this.isUserAuthenticated()) {
+                        this.showAuthRequiredNotice('Please sign in or continue as Guest to start your alarm.');
+                        return;
+                    }
 
                     this.navigateToView('app');
                     if (query && query.length >= 2) {
@@ -345,7 +382,12 @@ class GeoWakeApp {
         window.addEventListener('hashchange', () => {
             const hash = window.location.hash.toLowerCase();
             if (hash === '#app' || hash === '#/app') {
-                this.navigateToView('app', false);
+                if (this.isUserAuthenticated()) {
+                    this.navigateToView('app', false);
+                } else {
+                    this.navigateToView('landing', false);
+                    this.showAuthRequiredNotice('Please sign in or continue as Guest to access the GeoWake app.');
+                }
             } else if (hash === '#home' || hash === '#/home' || hash === '' || hash === '#') {
                 this.navigateToView('landing', false);
             }
@@ -806,6 +848,25 @@ class GeoWakeApp {
             });
         }
 
+        // Guest Mode button handler
+        const btnGuestLogin = document.getElementById('btn-guest-login');
+        if (btnGuestLogin) {
+            btnGuestLogin.addEventListener('click', (e) => {
+                e.preventDefault();
+                window.authManager.loginAsGuest();
+                if (authAlertBox) {
+                    authAlertBox.className = 'auth-status success';
+                    authAlertBox.innerHTML = '<i class="fas fa-user-secret"></i> Logged in as Guest. Session is temporary.';
+                    authAlertBox.classList.remove('hidden');
+                }
+                this.log('👤 Entered Guest Mode. Login data and trip history will not be saved.');
+                setTimeout(() => {
+                    closeAuthModal();
+                    this.navigateToView('app');
+                }, 300);
+            });
+        }
+
         // Sign Out buttons
         ['btn-sign-out-landing', 'btn-sign-out-app'].forEach(id => {
             const btn = document.getElementById(id);
@@ -814,7 +875,8 @@ class GeoWakeApp {
                     e.preventDefault();
                     e.stopPropagation();
                     window.authManager.logout();
-                    this.log('🔒 Signed out. Operating in open guest mode.');
+                    this.navigateToView('landing');
+                    this.log('🔒 Signed out.');
                 });
             }
         });
@@ -831,25 +893,43 @@ class GeoWakeApp {
         const userInitialApp = document.getElementById('user-initial-app');
         const userNameApp = document.getElementById('user-name-app');
 
-        if (user && user.username) {
-            const initial = (user.name || user.username)[0].toUpperCase();
-            const displayName = user.username;
+        if (user) {
+            const isGuest = !!user.isGuest;
+            const initial = isGuest ? '<i class="fas fa-user-secret"></i>' : (user.name || user.username || 'U')[0].toUpperCase();
+            const displayName = isGuest ? 'Guest' : (user.username || 'User');
+            const logoutTitle = isGuest ? 'Exit Guest Mode' : 'Sign Out';
 
-            if (btnOpenLanding) btnOpenLanding.classList.add('hidden');
-            if (userBadgeLanding) userBadgeLanding.classList.remove('hidden');
-            if (userInitialLanding) userInitialLanding.textContent = initial;
-            if (userNameLanding) userNameLanding.textContent = `@${displayName}`;
+            [btnOpenLanding, btnOpenApp].forEach(btn => btn?.classList.add('hidden'));
 
-            if (btnOpenApp) btnOpenApp.classList.add('hidden');
-            if (userBadgeApp) userBadgeApp.classList.remove('hidden');
-            if (userInitialApp) userInitialApp.textContent = initial;
-            if (userNameApp) userNameApp.textContent = `@${displayName}`;
+            [userBadgeLanding, userBadgeApp].forEach(b => {
+                if (!b) return;
+                b.classList.remove('hidden');
+                b.classList.toggle('guest-badge-pill', isGuest);
+            });
+
+            [userInitialLanding, userInitialApp].forEach(el => {
+                if (el) el.innerHTML = initial;
+            });
+
+            [userNameLanding, userNameApp].forEach(el => {
+                if (el) {
+                    el.innerHTML = isGuest
+                        ? `<span class="guest-name-label">Guest</span> <span class="guest-nav-tag">Private</span>`
+                        : `@${displayName}`;
+                }
+            });
+
+            ['btn-sign-out-landing', 'btn-sign-out-app'].forEach(btnId => {
+                const b = document.getElementById(btnId);
+                if (b) b.title = logoutTitle;
+            });
         } else {
-            if (btnOpenLanding) btnOpenLanding.classList.remove('hidden');
-            if (userBadgeLanding) userBadgeLanding.classList.add('hidden');
-
-            if (btnOpenApp) btnOpenApp.classList.remove('hidden');
-            if (userBadgeApp) userBadgeApp.classList.add('hidden');
+            [btnOpenLanding, btnOpenApp].forEach(btn => btn?.classList.remove('hidden'));
+            [userBadgeLanding, userBadgeApp].forEach(b => {
+                if (!b) return;
+                b.classList.add('hidden');
+                b.classList.remove('guest-badge-pill');
+            });
         }
     }
 
@@ -1368,6 +1448,12 @@ class GeoWakeApp {
     }
 
     recordHistory(destination, radius, status) {
+        // Privacy Rule: Never record trips for Guest sessions
+        if (window.authManager && window.authManager.isGuest()) {
+            this.log('🔒 Guest Mode: Trip completed. Trip history is not saved.');
+            return;
+        }
+
         const item = {
             id: 'hist-' + Date.now(),
             dest: destination,
@@ -1425,7 +1511,24 @@ class GeoWakeApp {
 
     renderTripHistory() {
         const container = document.getElementById('trip-history-list');
+        const guestBanner = document.getElementById('guest-history-banner');
         if (!container) return;
+
+        if (window.authManager && window.authManager.isGuest()) {
+            if (guestBanner) guestBanner.classList.remove('hidden');
+            container.innerHTML = `
+                <div class="guest-history-empty">
+                    <i class="fas fa-shield-halved"></i>
+                    <div style="font-weight: 700; color: #FFF; margin-bottom: 4px;">Trip History Disabled</div>
+                    <div style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.4;">
+                        You are browsing in <strong>Guest Mode</strong>. Your destination logs and trip records are completely private and never saved to storage or database.
+                    </div>
+                </div>
+            `;
+            return;
+        }
+
+        if (guestBanner) guestBanner.classList.add('hidden');
 
         if (!this.tripHistory || this.tripHistory.length === 0) {
             container.innerHTML = `<div style="font-size: 0.8rem; color: var(--text-muted); text-align: center; padding: 20px 0;">No previous trips recorded yet.</div>`;
