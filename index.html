@@ -22,7 +22,7 @@
     <script src="js/theme.js"></script>
 
     <!-- Custom CSS (Transit Theme) -->
-    <link rel="stylesheet" href="style.css?v=2.5">
+    <link rel="stylesheet" href="style.css?v=2.6">
 </head>
 <body>
 
@@ -771,7 +771,12 @@
                     </div>
                     <div class="auth-field-group">
                         <label for="login-password"><i class="fas fa-lock"></i> Password</label>
-                        <input type="password" id="login-password" name="password" placeholder="Enter password" autocomplete="current-password" required>
+                        <div class="password-input-wrap">
+                            <input type="password" id="login-password" name="password" placeholder="Enter password" autocomplete="current-password" required>
+                            <button type="button" class="btn-toggle-password" id="btn-toggle-login-password" title="Show password" aria-label="Show password" tabindex="-1">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Remember Me Option -->
@@ -804,7 +809,12 @@
                     </div>
                     <div class="auth-field-group">
                         <label for="reg-password"><i class="fas fa-lock"></i> Choose Password</label>
-                        <input type="password" id="reg-password" name="password" placeholder="e.g. Secure#2026" autocomplete="new-password" required>
+                        <div class="password-input-wrap">
+                            <input type="password" id="reg-password" name="password" placeholder="e.g. Secure#2026" autocomplete="new-password" required>
+                            <button type="button" class="btn-toggle-password" id="btn-toggle-reg-password" title="Show password" aria-label="Show password" tabindex="-1">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
                         <span class="auth-field-hint">Must contain at least 1 capital letter, 1 number, and 1 special character</span>
                     </div>
 
@@ -863,14 +873,14 @@
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
-    <!-- Scripts (v2.5 Refined Top Navigation & Mobile Header) -->
-    <script src="js/audio.js?v=2.5"></script>
-    <script src="js/cloud-db.js?v=2.5"></script>
-    <script src="js/auth.js?v=2.5"></script>
-    <script src="js/telemetry.js?v=2.5"></script>
-    <script src="js/geolocation.js?v=2.5"></script>
-    <script src="js/map.js?v=2.5"></script>
-    <script src="js/simulator.js?v=2.5"></script>
-    <script src="js/app.js?v=2.5"></script>
+    <!-- Scripts (v2.6 Password Toggle & Mobile Optimization) -->
+    <script src="js/audio.js?v=2.6"></script>
+    <script src="js/cloud-db.js?v=2.6"></script>
+    <script src="js/auth.js?v=2.6"></script>
+    <script src="js/telemetry.js?v=2.6"></script>
+    <script src="js/geolocation.js?v=2.6"></script>
+    <script src="js/map.js?v=2.6"></script>
+    <script src="js/simulator.js?v=2.6"></script>
+    <script src="js/app.js?v=2.6"></script>
 </body>
 </html>

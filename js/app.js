@@ -774,11 +774,58 @@ class GeoWakeApp {
             }
         };
 
+        // Helper to reset password field visibility to hidden
+        const resetPasswordVisibility = (btnId, inputId) => {
+            const btn = document.getElementById(btnId);
+            const input = document.getElementById(inputId);
+            if (input && input.type !== 'password') {
+                input.type = 'password';
+            }
+            if (btn) {
+                btn.innerHTML = '<i class="fas fa-eye"></i>';
+                btn.title = 'Show password';
+                btn.setAttribute('aria-label', 'Show password');
+                btn.classList.remove('active');
+            }
+        };
+
+        // Wire show/hide password buttons
+        const setupPasswordToggle = (btnId, inputId) => {
+            const btn = document.getElementById(btnId);
+            const input = document.getElementById(inputId);
+            if (!btn || !input) return;
+
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const isPassword = input.type === 'password';
+                if (isPassword) {
+                    input.type = 'text';
+                    btn.innerHTML = '<i class="fas fa-eye-slash"></i>';
+                    btn.title = 'Hide password';
+                    btn.setAttribute('aria-label', 'Hide password');
+                    btn.classList.add('active');
+                } else {
+                    input.type = 'password';
+                    btn.innerHTML = '<i class="fas fa-eye"></i>';
+                    btn.title = 'Show password';
+                    btn.setAttribute('aria-label', 'Show password');
+                    btn.classList.remove('active');
+                }
+                input.focus();
+            });
+        };
+
+        setupPasswordToggle('btn-toggle-login-password', 'login-password');
+        setupPasswordToggle('btn-toggle-reg-password', 'reg-password');
+
         const closeAuthModal = () => {
             if (authModal) {
                 authModal.classList.add('hidden');
                 if (authAlertBox) authAlertBox.classList.add('hidden');
             }
+            resetPasswordVisibility('btn-toggle-login-password', 'login-password');
+            resetPasswordVisibility('btn-toggle-reg-password', 'reg-password');
         };
 
         document.querySelectorAll('.btn-auth-trigger').forEach(btn => {
@@ -805,6 +852,7 @@ class GeoWakeApp {
                 if (formLogin) formLogin.classList.remove('hidden');
                 if (formRegister) formRegister.classList.add('hidden');
                 if (authAlertBox) authAlertBox.classList.add('hidden');
+                resetPasswordVisibility('btn-toggle-reg-password', 'reg-password');
             });
 
             tabBtnRegister.addEventListener('click', () => {
@@ -813,6 +861,7 @@ class GeoWakeApp {
                 if (formRegister) formRegister.classList.remove('hidden');
                 if (formLogin) formLogin.classList.add('hidden');
                 if (authAlertBox) authAlertBox.classList.add('hidden');
+                resetPasswordVisibility('btn-toggle-login-password', 'login-password');
             });
         }
 
