@@ -4265,12 +4265,30 @@ button {
 @media (max-width: 767px) {
     /* 1. App Navigation & Header Compact Optimization */
     .app-transit-header {
-        padding: 10px 12px;
+        position: sticky;
+        top: 0;
+        z-index: 1001;
+        padding: max(8px, env(safe-area-inset-top)) 12px 8px;
+        background: var(--bg-card);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-bottom: 1px solid var(--border-medium);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
         gap: 8px;
     }
 
+    .app-transit-nav-left {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+        flex-shrink: 1;
+    }
+
     .track-bus-title {
-        font-size: 1.05rem;
+        font-size: 1.02rem;
         max-width: 140px;
         white-space: nowrap;
         overflow: hidden;
@@ -4278,23 +4296,28 @@ button {
     }
 
     .btn-transit-back {
-        width: 34px;
-        height: 34px;
-        font-size: 0.88rem;
+        width: 36px;
+        height: 36px;
+        font-size: 0.90rem;
+        flex-shrink: 0;
     }
 
     .app-transit-nav-right {
+        display: flex;
+        align-items: center;
         gap: 6px;
+        flex-shrink: 0;
     }
 
     .app-transit-header .icon-round-btn,
     .app-transit-header .btn-theme-toggle {
-        width: 34px;
-        height: 34px;
+        width: 36px;
+        height: 36px;
         padding: 0;
         display: flex;
         align-items: center;
         justify-content: center;
+        flex-shrink: 0;
     }
 
     .app-transit-header .theme-text {
@@ -4304,6 +4327,7 @@ button {
     .app-transit-header .btn-auth-nav {
         padding: 6px 10px;
         font-size: 0.80rem;
+        min-height: 36px;
     }
 
     .app-transit-header .btn-auth-nav span {
@@ -4318,18 +4342,28 @@ button {
         display: none !important;
     }
 
+    .user-nav-badge {
+        padding: 3px 6px 3px 4px;
+        gap: 5px;
+    }
+
     /* 2. Landing Page Hero & Navigation */
     .transit-hero-section {
-        padding: 14px 14px 32px;
-        border-radius: 0 0 20px 20px;
+        padding: max(14px, env(safe-area-inset-top)) 14px 34px;
+        border-radius: 0 0 24px 24px;
     }
 
     .transit-nav-bar {
         gap: 8px;
+        margin-bottom: 20px;
     }
 
     .brand-sub-badge {
         display: none;
+    }
+
+    .brand-text-title {
+        font-size: 1.25rem;
     }
 
     .transit-nav-actions {
@@ -4339,51 +4373,172 @@ button {
 
     .nav-capsule-btn {
         width: 44px;
-        height: 34px;
+        height: 36px;
     }
 
     .nav-capsule-btn i {
-        font-size: 0.90rem;
+        font-size: 0.95rem;
     }
 
     .transit-nav-bar .btn-nav-launch {
-        height: 34px;
+        height: 36px;
         padding: 0 14px;
         font-size: 0.88rem;
         gap: 6px;
     }
 
+    .landing-hero-body,
+    .landing-hero-center {
+        padding: 0 4px;
+    }
+
     .landing-hero-heading {
-        font-size: 1.75rem;
-        line-height: 1.25;
+        font-size: 1.70rem;
+        line-height: 1.24;
+        margin-bottom: 12px;
     }
 
     .landing-hero-desc {
         font-size: 0.90rem;
-        line-height: 1.5;
+        line-height: 1.55;
+        margin-bottom: 20px;
     }
 
     .hero-actions-group {
         flex-direction: column;
         width: 100%;
         gap: 10px;
+        margin-bottom: 20px;
     }
 
     .hero-cta-primary,
     .hero-cta-secondary {
         width: 100%;
+        min-height: 48px;
         justify-content: center;
-        padding: 14px;
+        padding: 13px 18px;
+        font-size: 0.95rem;
     }
 
     .hero-perks-row {
         flex-direction: column;
         align-items: flex-start;
-        gap: 8px;
-        padding: 0 8px;
+        gap: 9px;
+        padding: 0 6px;
     }
 
-    /* 3. Mobile Segmented Tab Switcher (Live Map vs Trip Options) */
+    /* 3. Quick Start Card on Phones */
+    .quick-start-container {
+        padding: 0 4px;
+        margin-top: 16px;
+    }
+
+    .quick-start-card {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 14px;
+        gap: 12px;
+        border-radius: var(--radius-lg);
+    }
+
+    .quick-start-input-wrap {
+        width: 100%;
+        gap: 10px;
+    }
+
+    .quick-start-input {
+        font-size: 16px !important;
+    }
+
+    .quick-start-btn {
+        width: 100%;
+        min-height: 48px;
+        justify-content: center;
+        font-size: 0.95rem;
+        border-radius: var(--radius-sm);
+    }
+
+    /* 4. Landing Content Sections on Phones */
+    .transit-main-content {
+        padding: 28px 14px calc(40px + env(safe-area-inset-bottom));
+        gap: 28px;
+    }
+
+    .about-card-centered {
+        padding: 24px 16px;
+        border-radius: var(--radius-lg);
+    }
+
+    .about-title {
+        font-size: 1.65rem;
+    }
+
+    .about-lead-text {
+        font-size: 0.90rem;
+        line-height: 1.6;
+    }
+
+    .about-pillars-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        margin: 20px 0;
+    }
+
+    .about-pillar-card {
+        padding: 16px;
+        gap: 12px;
+    }
+
+    .about-example-callout {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 14px;
+        gap: 10px;
+        font-size: 0.86rem;
+        margin-bottom: 20px;
+    }
+
+    .how-it-works-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .step-minimal-card {
+        padding: 20px 16px;
+    }
+
+    .transit-preview-card {
+        padding: 20px 16px;
+    }
+
+    .transit-preview-card .sound-pills-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .sound-pill {
+        min-height: 44px;
+        padding: 10px 12px;
+        font-size: 0.84rem;
+        justify-content: center;
+    }
+
+    .transit-footer-minimal {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 16px;
+        padding: 28px 14px calc(30px + env(safe-area-inset-bottom));
+    }
+
+    .footer-action-links,
+    .footer-cta-btn {
+        width: 100%;
+        justify-content: center;
+        min-height: 48px;
+    }
+
+    /* 5. Mobile Segmented Tab Switcher (Live Map vs Trip Options) */
     .app-workspace {
         padding: 10px 10px calc(24px + env(safe-area-inset-bottom));
     }
@@ -4399,7 +4554,7 @@ button {
         margin-bottom: 12px;
         box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
         position: sticky;
-        top: 56px;
+        top: calc(52px + env(safe-area-inset-top));
         z-index: 1000;
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
@@ -4443,7 +4598,7 @@ button {
         color: #FFFFFF;
     }
 
-    /* 4. Tab Pane Visibility Logic */
+    /* 6. Tab Pane Visibility Logic */
     .app-layout-grid[data-active-tab="map"] #trip-controller-card {
         display: none;
     }
@@ -4465,11 +4620,18 @@ button {
         display: none;
     }
 
-    /* 5. Mobile Map Sizing & Floating Bottom Bar */
+    /* 7. Mobile Map Sizing & Floating Controls */
     #interactive-map {
-        height: calc(100dvh - 200px);
-        min-height: 420px;
+        height: calc(100dvh - 180px);
+        min-height: 380px;
+        max-height: 640px;
         border-radius: var(--radius-lg);
+    }
+
+    /* Native touch pinch-to-zoom is available on phones; hide duplicate FAB buttons */
+    #btn-map-zoom-in,
+    #btn-map-zoom-out {
+        display: none !important;
     }
 
     .map-floating-controls {
@@ -4481,7 +4643,7 @@ button {
     .map-fab-btn {
         width: 38px;
         height: 38px;
-        font-size: 0.88rem;
+        font-size: 0.90rem;
     }
 
     .map-floating-route-badge {
@@ -4495,32 +4657,44 @@ button {
         text-overflow: ellipsis;
     }
 
+    /* Keep Leaflet native controls cleanly above the floating bottom card */
     .leaflet-control-zoom {
         margin-right: 10px !important;
-        margin-bottom: 90px !important;
+        margin-bottom: 130px !important;
     }
 
     .leaflet-control-scale {
-        margin-left: 12px !important;
-        margin-bottom: 90px !important;
+        margin-left: 10px !important;
+        margin-bottom: 130px !important;
     }
 
+    .leaflet-control-attribution {
+        margin-bottom: 125px !important;
+        font-size: 9px !important;
+        background: rgba(255, 255, 255, 0.75) !important;
+        max-width: 60vw;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Floating Bottom Action Card on Mobile Map */
     .mobile-map-floating-card {
         position: absolute;
-        bottom: 12px;
-        left: 10px;
-        right: 10px;
+        bottom: calc(10px + env(safe-area-inset-bottom));
+        left: 8px;
+        right: 8px;
         z-index: 1000;
         background: var(--bg-glass);
         backdrop-filter: blur(16px);
         -webkit-backdrop-filter: blur(16px);
         border: 1px solid var(--border-medium);
         border-radius: var(--radius-lg);
-        padding: 12px 14px;
+        padding: 11px 14px;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.16);
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 8px;
         animation: slideUpFloat 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
@@ -4551,16 +4725,17 @@ button {
 
     .mobile-floating-dest-name {
         font-family: var(--font-heading);
-        font-size: 0.94rem;
+        font-size: 0.92rem;
         font-weight: 800;
         color: var(--text-primary);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        max-width: 240px;
     }
 
     .mobile-floating-eta {
-        font-size: 0.78rem;
+        font-size: 0.76rem;
         font-weight: 700;
         color: var(--accent-primary);
     }
@@ -4594,7 +4769,7 @@ button {
         color: #FFFFFF;
         font-weight: 800;
         font-family: var(--font-heading);
-        font-size: 0.94rem;
+        font-size: 0.92rem;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -4609,7 +4784,7 @@ button {
         box-shadow: 0 4px 16px var(--accent-danger-pale);
     }
 
-    /* 6. Mobile Collapsible Simulator Accordion */
+    /* 8. Mobile Collapsible Simulator Accordion */
     .mobile-sim-accordion {
         margin-top: 12px;
     }
@@ -4670,11 +4845,22 @@ button {
         display: block;
     }
 
-    /* 7. Trip Settings Arrangement on Phone */
+    /* 9. Trip Settings Arrangement on Phone */
     .trip-controller-card {
-        padding: 16px;
+        padding: 16px 14px;
         gap: 14px;
         border-radius: var(--radius-md);
+    }
+
+    .search-input-wrapper {
+        min-height: 46px;
+    }
+
+    .search-dropdown {
+        max-height: 220px;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        z-index: 2500;
     }
 
     .live-location-card {
@@ -4696,6 +4882,20 @@ button {
         font-size: 0.80rem;
     }
 
+    .minimal-slider {
+        height: 8px;
+    }
+
+    .minimal-slider::-webkit-slider-thumb {
+        width: 24px;
+        height: 24px;
+    }
+
+    .minimal-slider::-moz-range-thumb {
+        width: 24px;
+        height: 24px;
+    }
+
     .sound-pills-row {
         grid-template-columns: 1fr;
         gap: 6px;
@@ -4707,13 +4907,13 @@ button {
     }
 
     .btn-primary-action {
-        min-height: 48px;
+        min-height: 50px;
         font-size: 1rem;
     }
 
-    /* 8. Active Trip Dashboard on Mobile */
+    /* 10. Active Trip Dashboard on Mobile */
     .active-trip-card {
-        padding: 16px;
+        padding: 16px 14px;
     }
 
     .active-trip-grid {
@@ -4722,11 +4922,11 @@ button {
     }
 
     .btn-stop-trip {
-        min-height: 48px;
+        min-height: 50px;
         font-size: 1rem;
     }
 
-    /* 9. Telemetry Clean Grid on Mobile */
+    /* 11. Telemetry Clean Grid on Mobile */
     .telemetry-bar-clean {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -4738,30 +4938,38 @@ button {
         font-size: 0.72rem;
     }
 
-    /* 10. Modals Optimization (Auth, History, Alarm Wake-up) */
+    /* 12. Modals Optimization (Auth, History, Alarm Wake-up) */
     .auth-modal-card,
     .history-modal-card {
         width: calc(100% - 24px);
         max-width: 420px;
         padding: 18px 16px;
         border-radius: var(--radius-lg);
+        max-height: 88vh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     .alarm-content-box {
         width: calc(100% - 24px);
-        padding: 30px 18px;
+        padding: 28px 18px calc(28px + env(safe-area-inset-bottom));
         border-radius: var(--radius-lg);
     }
 
     .alarm-title {
-        font-size: 1.85rem;
+        font-size: 1.80rem;
     }
 
     .alarm-destination-name {
-        font-size: 1.20rem;
+        font-size: 1.15rem;
     }
 
-    /* 11. iOS Auto-Zoom Fix for Form Inputs */
+    .btn-stop-alarm-huge {
+        min-height: 54px;
+        font-size: 1.05rem;
+    }
+
+    /* 13. iOS Auto-Zoom Fix for Form Inputs & Touch Manipulations */
     input[type="text"],
     input[type="password"],
     input[type="search"],
@@ -4769,8 +4977,84 @@ button {
         font-size: 16px !important;
     }
 
-    button, .sound-pill-opt, .radius-btn, .mobile-tab-btn {
+    button, .sound-pill-opt, .radius-btn, .mobile-tab-btn, .sound-pill {
         touch-action: manipulation;
         -webkit-tap-highlight-color: transparent;
     }
 }
+
+/* ── NARROW PHONES (< 480px) ───────────────────────────────────────── */
+@media (max-width: 480px) {
+    .cloud-db-status-badge span {
+        display: none !important;
+    }
+
+    .cloud-db-status-badge {
+        padding: 6px 8px;
+    }
+
+    .brand-text-title {
+        font-size: 1.15rem;
+    }
+
+    .track-bus-title {
+        font-size: 0.96rem;
+        max-width: 125px;
+    }
+
+    .transit-preview-card .sound-pills-row {
+        grid-template-columns: 1fr;
+    }
+
+    .radius-buttons-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .active-trip-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .mobile-floating-dest-name {
+        max-width: 180px;
+    }
+}
+
+/* ── ULTRA-NARROW PHONES (< 380px) ─────────────────────────────────── */
+@media (max-width: 380px) {
+    .track-bus-title {
+        font-size: 0.88rem;
+        max-width: 105px;
+    }
+
+    .app-transit-header {
+        padding-left: 6px;
+        padding-right: 6px;
+        gap: 4px;
+    }
+
+    .app-transit-nav-right {
+        gap: 4px;
+    }
+
+    .btn-transit-back,
+    .app-transit-header .icon-round-btn,
+    .app-transit-header .btn-theme-toggle {
+        width: 32px;
+        height: 32px;
+    }
+
+    .mobile-tab-btn {
+        font-size: 0.78rem;
+        padding: 8px 6px;
+        gap: 4px;
+    }
+
+    .radius-buttons-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .mobile-floating-dest-name {
+        max-width: 140px;
+    }
+}
+

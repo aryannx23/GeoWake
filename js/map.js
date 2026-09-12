@@ -40,7 +40,8 @@ class MapManager {
             doubleClickZoom: true,
             touchZoom: true,
             boxZoom: true,
-            keyboard: true
+            keyboard: true,
+            tap: false // CRITICAL FOR MOBILE: disables legacy simulated tap delay/stutter on iOS & Android
         });
 
         // 1. Define Free Leaflet Tile Layers (No API Key Required)
@@ -83,7 +84,17 @@ class MapManager {
             this.reverseGeocode(lat, lng);
         });
 
-        // Ensure Leaflet renders tiles accurately when container resizes
+        // Ensure Leaflet renders tiles accurately when container resizes or rotates
+        window.addEventListener('resize', () => {
+            if (this.map) this.map.invalidateSize();
+        }, { passive: true });
+
+        window.addEventListener('orientationchange', () => {
+            setTimeout(() => {
+                if (this.map) this.map.invalidateSize();
+            }, 300);
+        }, { passive: true });
+
         setTimeout(() => {
             if (this.map) this.map.invalidateSize();
         }, 250);

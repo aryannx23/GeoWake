@@ -166,18 +166,25 @@ class LiveLocationTracker {
             },
             (err) => {
                 console.warn('watchPosition error or timeout, retaining position', err);
-                if (err.code === 1) {
-                    this.updateStatus('DENIED', 'Location permission denied');
-                } else {
-                    // Non-fatal, try fetching via standard/fallback
-                    this.getCurrentPosition().then(sample => {
-                        if (this.onLocationUpdateCallback) this.onLocationUpdateCallback(sample);
-                    }).catch(() => {});
+                if (err.code === 1) { // PERMISSION_DENIED
+                    this.updateStatus('DENIED', 'Location permission denied. Please allow location access in your mobile browser address bar.');
+                    if (this.onErrorCallback) {
+                        this.onErrorCallback('Location permission denied. Please enable GPS in browser settings.');
+                    }
+                } else if (err.code === 2) { // POSITION_UNAVAILABLE
+                    this.updateStatus('ERROR', 'GPS signal weak. Searching satellites...');
+                } else if (err.code === 3) { // TIMEOUT
+                    // Mobile devices frequently timeout during initial lock; don't terminate, keep last known fix
+                    if (!this.lastPosition) {
+                        this.getCurrentPosition().then(sample => {
+                            if (this.onLocationUpdateCallback) this.onLocationUpdateCallback(sample);
+                        }).catch(() => {});
+                    }
                 }
             },
             {
                 enableHighAccuracy: true,
-                timeout: 10000,
+                timeout: 15000,
                 maximumAge: 5000
             }
         );

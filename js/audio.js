@@ -10,20 +10,70 @@ class SoundEngine {
         this.isPlaying = false;
         this.volume = 0.9;
         this.activeIntervals = [];
+        this.isUnlocked = false;
+        this.keepaliveInterval = null;
     }
 
     init() {
         if (!this.ctx) {
             const AudioContext = window.AudioContext || window.webkitAudioContext;
-            this.ctx = new AudioContext();
+            if (AudioContext) {
+                this.ctx = new AudioContext();
+            }
         }
-        if (this.ctx.state === 'suspended') {
-            this.ctx.resume();
+        if (this.ctx && this.ctx.state === 'suspended') {
+            this.ctx.resume().catch(() => {});
+        }
+    }
+
+    unlockAudio() {
+        this.init();
+        if (this.ctx) {
+            if (this.ctx.state === 'suspended') {
+                this.ctx.resume().catch(() => {});
+            }
+            try {
+                // Play 1 silent frame to unlock hardware audio output on mobile Safari & Chrome
+                const buffer = this.ctx.createBuffer(1, 1, 22050);
+                const source = this.ctx.createBufferSource();
+                source.buffer = buffer;
+                source.connect(this.ctx.destination);
+                source.start(0);
+                this.isUnlocked = true;
+            } catch (e) {}
+        }
+    }
+
+    startAudioKeepalive() {
+        this.stopAudioKeepalive();
+        this.keepaliveInterval = setInterval(() => {
+            if (this.ctx && this.ctx.state === 'running' && !this.isPlaying) {
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    gain.gain.value = 0.0001;
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + 0.1);
+                } catch (e) {}
+            }
+        }, 25000);
+    }
+
+    stopAudioKeepalive() {
+        if (this.keepaliveInterval) {
+            clearInterval(this.keepaliveInterval);
+            this.keepaliveInterval = null;
         }
     }
 
     setVolume(val) {
         this.volume = Math.max(0, Math.min(1, val));
+    }
+
+    stopAlarm() {
+        this.stopAll();
     }
 
     stopAll() {
@@ -40,7 +90,9 @@ class SoundEngine {
         }
 
         if ('vibrate' in navigator) {
-            navigator.vibrate(0);
+            try {
+                navigator.vibrate(0);
+            } catch (e) {}
         }
     }
 
@@ -270,3 +322,18 @@ class SoundEngine {
 }
 
 window.soundEngine = new SoundEngine();
+
+// Auto-unlock Web Audio on first mobile touch or click anywhere on screen
+(function() {
+    const unlockHandler = function() {
+        if (window.soundEngine) {
+            window.soundEngine.unlockAudio();
+        }
+        ['touchstart', 'touchend', 'pointerdown', 'click'].forEach(evt => {
+            document.removeEventListener(evt, unlockHandler, true);
+        });
+    };
+    ['touchstart', 'touchend', 'pointerdown', 'click'].forEach(evt => {
+        document.addEventListener(evt, unlockHandler, { capture: true, passive: true });
+    });
+})();

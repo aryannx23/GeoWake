@@ -54,6 +54,30 @@ class GeoWakeApp {
         ];
 
         this.logEntries = [];
+        this.wakeLockSentinel = null;
+    }
+
+    async requestWakeLock() {
+        if ('wakeLock' in navigator) {
+            try {
+                this.wakeLockSentinel = await navigator.wakeLock.request('screen');
+                this.wakeLockSentinel.addEventListener('release', () => {
+                    this.wakeLockSentinel = null;
+                });
+                this.log('🔆 Screen Wake-Lock active: Your phone will stay awake during transit.');
+            } catch (err) {
+                console.warn('Screen Wake Lock could not be acquired', err);
+            }
+        }
+    }
+
+    releaseWakeLock() {
+        if (this.wakeLockSentinel) {
+            try {
+                this.wakeLockSentinel.release();
+            } catch (e) {}
+            this.wakeLockSentinel = null;
+        }
     }
 
     init() {
@@ -61,6 +85,13 @@ class GeoWakeApp {
         this.bindEvents();
         this.renderSavedPlaces();
         this.renderTripHistory();
+
+        // Re-acquire Screen Wake Lock when returning to tab during active trip
+        document.addEventListener('visibilitychange', async () => {
+            if (document.visibilityState === 'visible' && this.state === 'ACTIVE') {
+                await this.requestWakeLock();
+            }
+        });
 
         // Link Live GPS Tracker
         if (window.liveTracker) {
@@ -1313,6 +1344,13 @@ class GeoWakeApp {
         this.currentTrip.startedAt = new Date().toLocaleTimeString();
         window.telemetryEngine.reset();
 
+        // Keep phone screen awake & ensure audio context is active during transit
+        this.requestWakeLock();
+        if (window.soundEngine) {
+            window.soundEngine.unlockAudio();
+            window.soundEngine.startAudioKeepalive();
+        }
+
         // Switch to Active Trip View
         document.getElementById('setup-card-panel').classList.add('hidden');
         document.getElementById('active-trip-panel').classList.remove('hidden');
@@ -1346,9 +1384,13 @@ class GeoWakeApp {
 
     stopTrip(reason = 'Trip Stopped') {
         this.state = 'COMPLETED';
+        this.releaseWakeLock();
         if (window.liveTracker) window.liveTracker.stopTracking();
         if (window.tripSimulator) window.tripSimulator.pause();
-        if (window.soundEngine) window.soundEngine.stopAll();
+        if (window.soundEngine) {
+            window.soundEngine.stopAll();
+            window.soundEngine.stopAudioKeepalive();
+        }
 
         document.getElementById('setup-card-panel').classList.remove('hidden');
         document.getElementById('active-trip-panel').classList.add('hidden');
