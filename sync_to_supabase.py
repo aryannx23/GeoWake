@@ -59,8 +59,22 @@ def main():
 
     # 1. Read Users
     c.execute('SELECT id, username, email, name, password_hash, password_salt, role, created_at, last_login FROM users')
-    users = [dict(r) for r in c.fetchall()]
-    print(f"[INFO] Found {len(users)} local users in SQLite.")
+    raw_users = [dict(r) for r in c.fetchall()]
+    users = []
+    seen_usernames = set()
+    for u in raw_users:
+        uname = u.get('username')
+        if not uname:
+            if u.get('email'):
+                uname = u['email'].split('@')[0]
+                u['username'] = uname
+            else:
+                continue
+        if uname.lower() not in seen_usernames:
+            seen_usernames.add(uname.lower())
+            users.append(u)
+
+    print(f"[INFO] Found {len(users)} valid user accounts in SQLite.")
 
     # 2. Read Trips
     c.execute('SELECT * FROM trips')
@@ -90,8 +104,6 @@ def main():
         except urllib.error.HTTPError as e:
             err_body = e.read().decode('utf-8', errors='ignore')
             print(f"[WARNING] Users upload error (HTTP {e.code}): {err_body}")
-            if "Could not find the table" in err_body:
-                print(">>> Action Required: Please run schema.sql in your Supabase SQL editor to create the tables!")
         except Exception as e:
             print(f"[ERROR] Users upload failed: {e}")
 
@@ -110,8 +122,6 @@ def main():
         except urllib.error.HTTPError as e:
             err_body = e.read().decode('utf-8', errors='ignore')
             print(f"[WARNING] Trips upload error (HTTP {e.code}): {err_body}")
-            if "Could not find the table" in err_body:
-                print(">>> Action Required: Please run schema.sql in your Supabase SQL editor to create the tables!")
         except Exception as e:
             print(f"[ERROR] Trips upload failed: {e}")
 

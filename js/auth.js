@@ -76,6 +76,64 @@ class AuthManager {
     }
 
     /**
+     * Browser PBKDF2-HMAC-SHA256 (100,000 iterations) - 100% compatible with Python server.py
+     */
+    async pbkdf2(password, salt) {
+        try {
+            if (window.crypto && window.crypto.subtle) {
+                const enc = new TextEncoder();
+                const keyMaterial = await window.crypto.subtle.importKey(
+                    'raw',
+                    enc.encode(password),
+                    { name: 'PBKDF2' },
+                    false,
+                    ['deriveBits']
+                );
+                const derivedBits = await window.crypto.subtle.deriveBits(
+                    {
+                        name: 'PBKDF2',
+                        salt: enc.encode(salt),
+                        iterations: 100000,
+                        hash: 'SHA-256'
+                    },
+                    keyMaterial,
+                    256
+                );
+                const hashArray = Array.from(new Uint8Array(derivedBits));
+                return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            }
+        } catch (e) {
+            console.warn('[AUTH] PBKDF2 derivation notice:', e);
+        }
+        return null;
+    }
+
+    /**
+     * Constant-compatible password verification supporting PBKDF2, SHA-256, and stored hash
+     */
+    async verifyPassword(password, salt, storedHash) {
+        if (!password || !storedHash) return false;
+        // 1. Check PBKDF2 hash (used by Python server and Supabase)
+        if (salt) {
+            try {
+                const calcHash = await this.pbkdf2(password, salt);
+                if (calcHash && calcHash.toLowerCase() === storedHash.toLowerCase()) {
+                    return true;
+                }
+            } catch (e) {}
+        }
+        // 2. Check SHA-256 fallback hash
+        try {
+            const shaHash = await this.sha256(password + '_geowake_salt');
+            if (shaHash.toLowerCase() === storedHash.toLowerCase()) {
+                return true;
+            }
+        } catch (e) {}
+        // 3. Exact match
+        return (password === storedHash);
+    }
+
+    /**
      * Load session from sessionStorage first (for session-only logins), then localStorage (for remember-me logins)
      */
     loadSession() {
@@ -307,8 +365,8 @@ class AuthManager {
             try {
                 const cloudUser = await window.cloudDatabase.fetchUserByUsername(cleanUser);
                 if (cloudUser) {
-                    const pwdHash = await this.sha256(password + '_geowake_salt');
-                    if (cloudUser.password_hash === pwdHash || cloudUser.password_hash === password) {
+                    const isMatch = await this.verifyPassword(password, cloudUser.password_salt, cloudUser.password_hash);
+                    if (isMatch) {
                         const sessionUser = {
                             id: cloudUser.id,
                             username: cloudUser.username,
