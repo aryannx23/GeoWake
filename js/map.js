@@ -28,12 +28,12 @@ class MapManager {
     init(containerId = 'interactive-map', initialLat = 23.3518, initialLon = 85.3378) {
         if (this.map) return;
 
-        // Create Leaflet map with all zoom interactions fully enabled
+        // Create Leaflet map with all zoom interactions fully enabled (capped at 50m scale / zoom 18)
         this.map = L.map(containerId, {
             center: [initialLat, initialLon],
             zoom: 13,
             minZoom: 3,
-            maxZoom: 19,
+            maxZoom: 18, // Blocks zooming in after 50 meters scale
             zoomControl: false,
             attributionControl: true,
             scrollWheelZoom: true,
@@ -49,16 +49,16 @@ class MapManager {
         this.tileLayers = {
             satellite: L.layerGroup([
                 L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-                    maxZoom: 19,
+                    maxZoom: 18,
                     attribution: '&copy; <a href="https://www.esri.com/">Esri</a> &mdash; Satellite Imagery'
                 }),
                 L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
-                    maxZoom: 19,
+                    maxZoom: 18,
                     attribution: ''
                 })
             ]),
             streets: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19,
+                maxZoom: 18,
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             })
         };
@@ -82,6 +82,13 @@ class MapManager {
         this.map.on('click', (e) => {
             const { lat, lng } = e.latlng;
             this.reverseGeocode(lat, lng);
+        });
+
+        // 5. Strict Zoom Enforcement (Caps at 50m scale threshold)
+        this.map.on('zoomend', () => {
+            if (this.map.getZoom() > 18) {
+                this.map.setZoom(18);
+            }
         });
 
         // Ensure Leaflet renders tiles accurately when container resizes or rotates
@@ -442,11 +449,13 @@ class MapManager {
     }
 
     /**
-     * Camera Pan & Zoom Helpers
+     * Camera Pan & Zoom Helpers (Capped at 50m scale / zoom 18)
      */
     zoomIn() {
         if (!this.map) return;
-        this.map.zoomIn();
+        if (this.map.getZoom() < 18) {
+            this.map.zoomIn();
+        }
     }
 
     zoomOut() {
@@ -456,7 +465,7 @@ class MapManager {
 
     setZoom(level) {
         if (!this.map) return;
-        this.map.setZoom(level);
+        this.map.setZoom(Math.min(level, 18));
     }
 
     toggleFollowUser() {
@@ -470,13 +479,13 @@ class MapManager {
     centerOnUser(zoom = 15) {
         if (!this.map || !this.userMarker) return;
         const latLng = this.userMarker.getLatLng();
-        this.map.flyTo(latLng, zoom, { duration: 1 });
+        this.map.flyTo(latLng, Math.min(zoom, 18), { duration: 1 });
     }
 
     centerOnDestination(zoom = 15) {
         if (!this.map || !this.destMarker) return;
         const latLng = this.destMarker.getLatLng();
-        this.map.flyTo(latLng, zoom, { duration: 1 });
+        this.map.flyTo(latLng, Math.min(zoom, 18), { duration: 1 });
     }
 
     fitBoundsToTrip() {

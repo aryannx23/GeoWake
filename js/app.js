@@ -557,8 +557,14 @@ class GeoWakeApp {
             btnMapZoomIn.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                if (window.mapManager) window.mapManager.zoomIn();
-                this.log('🔍 Zoomed map in.');
+                if (window.mapManager) {
+                    if (window.mapManager.map && window.mapManager.map.getZoom() >= 18) {
+                        this.log('🔍 Maximum zoom reached (capped at 50m scale).');
+                    } else {
+                        window.mapManager.zoomIn();
+                        this.log('🔍 Zoomed map in.');
+                    }
+                }
             });
         }
 
