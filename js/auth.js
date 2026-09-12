@@ -264,13 +264,12 @@ class AuthManager {
             throw new Error('Please enter both username and password.');
         }
 
-        // 1. Try Python SQLite server if reachable
-        const candidates = window.location.port === '8000'
-            ? ['']
-            : [this.apiBase || 'http://localhost:8000', ''];
+        const isLocalhost = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 
-        for (const base of candidates) {
+        // 1. Try Python SQLite server ONLY if on localhost
+        if (isLocalhost) {
             try {
+                const base = this.apiBase || (window.location.port === '8000' ? '' : 'http://localhost:8000');
                 const resp = await fetch(`${base}/api/auth/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -281,33 +280,29 @@ class AuthManager {
                     })
                 });
 
-                // Live Server returns 405 Method Not Allowed
-                if (resp.status === 405) {
-                    continue;
-                }
-
-                const data = await this.safeParseJson(resp);
-
-                if (resp.ok && data.success) {
-                    this.apiBase = base;
-                    this.serverOnline = true;
-                    this.saveSession(data.user, data.sessionToken, data.rememberMe !== undefined ? data.rememberMe : rememberMe);
-                    if (data.user && data.user.id) {
-                        this.fetchUserTripsFromDb(data.user.id);
+                if (resp.ok) {
+                    const data = await this.safeParseJson(resp);
+                    if (data && data.success) {
+                        this.apiBase = base;
+                        this.serverOnline = true;
+                        this.saveSession(data.user, data.sessionToken, data.rememberMe !== undefined ? data.rememberMe : rememberMe);
+                        if (data.user && data.user.id) {
+                            this.fetchUserTripsFromDb(data.user.id);
+                        }
+                        return data.user;
                     }
-                    return data.user;
                 } else if (resp.status === 400 || resp.status === 401 || resp.status === 409) {
-                    // Valid backend responded with authentication rejection
+                    const data = await this.safeParseJson(resp);
                     throw new Error(data.error || 'Invalid username or password.');
                 }
             } catch (err) {
-                if (err.message && !err.message.includes('Failed to fetch') && !err.message.includes('NetworkError')) {
+                if (err.message && err.message.includes('password')) {
                     throw err;
                 }
             }
         }
 
-        // 2. Try Supabase Cloud Database (e.g. when hosted on Vercel or mobile)
+        // 2. Try Supabase Cloud Database (for Vercel, mobile, or cloud sync)
         if (window.cloudDatabase && window.cloudDatabase.isOnline) {
             try {
                 const cloudUser = await window.cloudDatabase.fetchUserByUsername(cleanUser);
@@ -335,7 +330,7 @@ class AuthManager {
             }
         }
 
-        // 3. Fallback: Authenticate against Local Storage accounts (offline mode)
+        // 3. Fallback: Authenticate against Local Storage accounts (offline mode on this device)
         const localAccounts = this.getLocalAccounts();
         const pwdHash = await this.sha256(password + '_geowake_salt');
 
@@ -358,6 +353,10 @@ class AuthManager {
         const userExists = localAccounts.some(u => u.username.toLowerCase() === cleanUser.toLowerCase());
         if (userExists) {
             throw new Error('Incorrect password. Please try again.');
+        }
+
+        if (!isLocalhost && window.cloudDatabase) {
+            throw new Error('Account not found in cloud database. If you created this account on your computer, please run schema.sql in Supabase SQL editor to enable cloud sync.');
         }
 
         throw new Error('Account not found. Please click "Create Account" first, or run "python server.py" for database sync.');
@@ -389,13 +388,12 @@ class AuthManager {
             throw new Error('Password must contain at least one special character (e.g. !@#$%^&*).');
         }
 
-        // 1. Try Python SQLite server if reachable
-        const candidates = window.location.port === '8000'
-            ? ['']
-            : [this.apiBase || 'http://localhost:8000', ''];
+        const isLocalhost = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 
-        for (const base of candidates) {
+        // 1. Try Python SQLite server ONLY if on localhost
+        if (isLocalhost) {
             try {
+                const base = this.apiBase || (window.location.port === '8000' ? '' : 'http://localhost:8000');
                 const resp = await fetch(`${base}/api/auth/register`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -407,20 +405,19 @@ class AuthManager {
                     })
                 });
 
-                // Live Server returns 405 Method Not Allowed
-                if (resp.status === 405) {
-                    continue;
-                }
-
-                const data = await this.safeParseJson(resp);
-
-                if (resp.ok && data.success) {
-                    this.apiBase = base;
-                    this.serverOnline = true;
-                    this.saveSession(data.user, data.sessionToken, data.rememberMe !== undefined ? data.rememberMe : rememberMe);
-                    return data.user;
-                } else if (data && data.error) {
-                    throw new Error(data.error);
+                if (resp.ok) {
+                    const data = await this.safeParseJson(resp);
+                    if (data && data.success) {
+                        this.apiBase = base;
+                        this.serverOnline = true;
+                        this.saveSession(data.user, data.sessionToken, data.rememberMe !== undefined ? data.rememberMe : rememberMe);
+                        return data.user;
+                    }
+                } else {
+                    const data = await this.safeParseJson(resp);
+                    if (data && data.error) {
+                        throw new Error(data.error);
+                    }
                 }
             } catch (err) {
                 if (err.message && !err.message.includes('Failed to fetch') && !err.message.includes('NetworkError')) {
@@ -434,7 +431,7 @@ class AuthManager {
             try {
                 const existingCloud = await window.cloudDatabase.fetchUserByUsername(cleanUser);
                 if (existingCloud) {
-                    throw new Error('Username is already taken. Please choose another.');
+                    throw new Error('Username is already taken. Please choose another or click Sign In.');
                 }
                 const pwdHash = await this.sha256(password + '_geowake_salt');
                 const userId = 'usr-cloud-' + Date.now();

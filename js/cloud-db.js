@@ -223,6 +223,16 @@ class CloudDatabaseEngine {
         return { success: true, online: false };
     }
 
+    async parseJsonSafe(resp) {
+        try {
+            const text = await resp.text();
+            if (!text || !text.trim()) return null;
+            return JSON.parse(text);
+        } catch (e) {
+            return null;
+        }
+    }
+
     /**
      * Fetch user record by username from Supabase
      */
@@ -236,7 +246,7 @@ class CloudDatabaseEngine {
                 }
             });
             if (resp.ok) {
-                const data = await resp.json();
+                const data = await this.parseJsonSafe(resp);
                 if (Array.isArray(data) && data.length > 0) {
                     return data[0];
                 }
@@ -314,7 +324,7 @@ class CloudDatabaseEngine {
                     }
                 );
                 if (resp.ok) {
-                    const rows = await resp.json();
+                    const rows = await this.parseJsonSafe(resp);
                     if (Array.isArray(rows)) {
                         this.isCloudReachable = true;
                         this.updateUiBadge('online');
@@ -339,28 +349,31 @@ class CloudDatabaseEngine {
             }
         }
 
-        // 2. Fallback: try local server.py if running
-        try {
-            const apiBase = window.authManager?.getApiBase ? window.authManager.getApiBase() : '';
-            if (apiBase) {
-                const resp = await fetch(`${apiBase}/api/user/trips?userId=${encodeURIComponent(userId)}`);
-                if (resp.ok && resp.status !== 405) {
-                    const data = await resp.json();
-                    if (data.trips && Array.isArray(data.trips)) {
-                        return data.trips.map(t => ({
-                            id: t.id,
-                            dest: t.destination_name,
-                            date: new Date(t.created_at || Date.now()).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
-                            radius: `${Math.round(t.alert_radius || 500)} m`,
-                            status: t.status || 'Completed',
-                            sound: t.alarm_sound || 'loud',
-                            destLat: t.dest_lat,
-                            destLon: t.dest_lon
-                        }));
+        // 2. Fallback: try local server.py only if on localhost
+        const isLocalhost = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+        if (isLocalhost) {
+            try {
+                const apiBase = window.authManager?.getApiBase ? window.authManager.getApiBase() : '';
+                if (apiBase) {
+                    const resp = await fetch(`${apiBase}/api/user/trips?userId=${encodeURIComponent(userId)}`);
+                    if (resp.ok && resp.status !== 405) {
+                        const data = await this.parseJsonSafe(resp);
+                        if (data && data.trips && Array.isArray(data.trips)) {
+                            return data.trips.map(t => ({
+                                id: t.id,
+                                dest: t.destination_name,
+                                date: new Date(t.created_at || Date.now()).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
+                                radius: `${Math.round(t.alert_radius || 500)} m`,
+                                status: t.status || 'Completed',
+                                sound: t.alarm_sound || 'loud',
+                                destLat: t.dest_lat,
+                                destLon: t.dest_lon
+                            }));
+                        }
                     }
                 }
-            }
-        } catch (e) {}
+            } catch (e) {}
+        }
 
         return [];
     }
