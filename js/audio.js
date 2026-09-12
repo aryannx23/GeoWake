@@ -295,12 +295,138 @@ class SoundEngine {
         }
     }
 
+    // 6. Heavy Klaxon (Dual-tone industrial blast + sub-kick, ultra-powerful wake-up)
+    playHeavyKlaxon(loop = true) {
+        this.init();
+        this.stopAll();
+        this.isPlaying = true;
+
+        const playKlaxonBlast = () => {
+            if (!this.isPlaying) return;
+            const now = this.ctx.currentTime;
+
+            // Two detuned sawtooth waves to produce massive acoustic beating
+            const freqs = [420, 465, 840];
+            freqs.forEach((f, idx) => {
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(f, now);
+                osc.frequency.exponentialRampToValueAtTime(f * 1.08, now + 0.35);
+
+                const vol = idx === 2 ? this.volume * 0.4 : this.volume * 0.88;
+                gain.gain.setValueAtTime(vol, now);
+                gain.gain.setValueAtTime(vol, now + 0.3);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.4);
+            });
+
+            // Low frequency sub-punch for physical presence
+            const subOsc = this.ctx.createOscillator();
+            const subGain = this.ctx.createGain();
+            subOsc.type = 'triangle';
+            subOsc.frequency.setValueAtTime(150, now);
+            subOsc.frequency.exponentialRampToValueAtTime(60, now + 0.35);
+            subGain.gain.setValueAtTime(this.volume * 0.7, now);
+            subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
+            subOsc.connect(subGain);
+            subGain.connect(this.ctx.destination);
+            subOsc.start(now);
+            subOsc.stop(now + 0.4);
+
+            // Second blast 450ms later (dual-tone fanfare)
+            const t2 = now + 0.45;
+            freqs.forEach((f, idx) => {
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(f * 1.12, t2);
+                osc.frequency.exponentialRampToValueAtTime(f * 1.2, t2 + 0.4);
+
+                const vol = idx === 2 ? this.volume * 0.4 : this.volume * 0.88;
+                gain.gain.setValueAtTime(vol, t2);
+                gain.gain.setValueAtTime(vol, t2 + 0.35);
+                gain.gain.exponentialRampToValueAtTime(0.001, t2 + 0.45);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(t2);
+                osc.stop(t2 + 0.46);
+            });
+
+            if ('vibrate' in navigator) {
+                navigator.vibrate([350, 100, 350, 200]);
+            }
+        };
+
+        playKlaxonBlast();
+        if (loop) {
+            const intId = setInterval(playKlaxonBlast, 1100);
+            this.activeIntervals.push(intId);
+        }
+    }
+
+    // 7. Air Raid Siren (Piercing 2.2kHz staccato pulses + alternating frequency modulation)
+    playAirRaid(loop = true) {
+        this.init();
+        this.stopAll();
+        this.isPlaying = true;
+
+        const playRaidBurst = () => {
+            if (!this.isPlaying) return;
+            const now = this.ctx.currentTime;
+            const pulses = [1400, 1800, 2200, 2600, 2200, 1800];
+
+            pulses.forEach((freq, idx) => {
+                const pTime = now + (idx * 0.09);
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(freq, pTime);
+                osc.frequency.exponentialRampToValueAtTime(freq * 1.15, pTime + 0.08);
+
+                gain.gain.setValueAtTime(this.volume * 0.85, pTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, pTime + 0.085);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(pTime);
+                osc.stop(pTime + 0.09);
+            });
+
+            if ('vibrate' in navigator) {
+                navigator.vibrate([100, 50, 100, 50, 100, 50, 100, 200]);
+            }
+        };
+
+        playRaidBurst();
+        if (loop) {
+            const intId = setInterval(playRaidBurst, 850);
+            this.activeIntervals.push(intId);
+        }
+    }
+
     // Play by sound ID
     playSound(soundId, loop = true) {
         switch (soundId) {
             case 'loud':
             case 'default':
                 this.playLoudAlarm(loop);
+                break;
+            case 'klaxon':
+            case 'horn':
+                this.playHeavyKlaxon(loop);
+                break;
+            case 'airraid':
+            case 'hyper':
+                this.playAirRaid(loop);
                 break;
             case 'siren':
                 this.playDigitalSiren(loop);

@@ -659,10 +659,9 @@ class GeoWakeApp {
                 this.currentTrip.alarmSound = soundId;
 
                 // Play a brief sample tone
-                if (soundId === 'loud') window.soundEngine.playLoudAlarm(false);
-                else if (soundId === 'siren') window.soundEngine.playDigitalSiren(false);
-                else if (soundId === 'chime') window.soundEngine.playTrainChime(false);
-                else if (soundId === 'radar') window.soundEngine.playRadarPulse(false);
+                if (window.soundEngine) {
+                    window.soundEngine.playSound(soundId, false);
+                }
             });
         });
 
