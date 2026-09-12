@@ -43,6 +43,11 @@
                 </div>
 
                 <div class="transit-nav-actions">
+                    <!-- Cloud Sync Status Badge -->
+                    <span class="cloud-db-status-badge badge-cyan" id="cloud-badge-landing" title="Cloud Database Sync Status">
+                        <i class="fas fa-cloud"></i> <span>Cloud DB</span>
+                    </span>
+
                     <!-- User Account Pill (Logged Out State) -->
                     <button id="btn-open-auth-landing" class="nav-capsule-btn btn-auth-trigger" title="Sign In or Register">
                         <i class="fas fa-circle-user"></i>
@@ -326,6 +331,11 @@
             </div>
 
             <div class="app-transit-nav-right">
+                <!-- Cloud Sync Status Badge -->
+                <span class="cloud-db-status-badge badge-cyan" id="cloud-badge-app" title="Cloud Database Sync Status">
+                    <i class="fas fa-cloud"></i> <span>Cloud DB</span>
+                </span>
+
                 <button id="btn-toggle-history" class="icon-round-btn" title="View History">
                     <i class="fas fa-clock-rotate-left"></i>
                 </button>
@@ -725,8 +735,11 @@
     <div id="history-modal" class="history-modal hidden">
         <div class="history-modal-card">
             <div class="history-modal-header">
-                <div class="history-modal-title">
-                    <i class="fas fa-clock-rotate-left" style="color: var(--accent-primary);"></i> Trip History
+                <div class="history-modal-title" style="display: flex; align-items: center; gap: 10px;">
+                    <span><i class="fas fa-clock-rotate-left" style="color: var(--accent-primary);"></i> Trip History</span>
+                    <span class="cloud-db-status-badge badge-cyan" style="font-size: 0.68rem; padding: 2px 8px;">
+                        <i class="fas fa-cloud"></i> <span>Cloud DB</span>
+                    </span>
                 </div>
                 <button id="btn-close-history" class="btn-close-modal" title="Close">
                     <i class="fas fa-xmark"></i>

@@ -719,16 +719,40 @@ button {
 
 /* Cloud Sync Badge */
 .cloud-db-status-badge {
-    background: rgba(255, 255, 255, 0.20);
-    border: 1px solid rgba(255, 255, 255, 0.30);
-    color: #FFFFFF;
     padding: 4px 10px;
     border-radius: var(--radius-full);
     font-size: 0.72rem;
     font-weight: 600;
     display: inline-flex;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
+    transition: all 0.25s ease;
+    user-select: none;
+    line-height: 1;
+}
+
+.cloud-db-status-badge.badge-green {
+    background: rgba(16, 185, 129, 0.16);
+    border: 1px solid rgba(16, 185, 129, 0.40);
+    color: #10B981;
+}
+
+.cloud-db-status-badge.badge-cyan {
+    background: rgba(6, 182, 212, 0.16);
+    border: 1px solid rgba(6, 182, 212, 0.35);
+    color: #06B6D4;
+}
+
+.transit-hero-section .cloud-db-status-badge.badge-green {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.4);
+    color: #FFFFFF;
+}
+
+.transit-hero-section .cloud-db-status-badge.badge-cyan {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: #FFFFFF;
 }
 
 /* ── MINIMAL HERO CONTENT & HEADLINES (CENTERED) ─────────────────── */

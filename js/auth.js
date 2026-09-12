@@ -307,7 +307,35 @@ class AuthManager {
             }
         }
 
-        // 2. Fallback: Authenticate against Local Storage accounts (when server.py is not running)
+        // 2. Try Supabase Cloud Database (e.g. when hosted on Vercel or mobile)
+        if (window.cloudDatabase && window.cloudDatabase.isOnline) {
+            try {
+                const cloudUser = await window.cloudDatabase.fetchUserByUsername(cleanUser);
+                if (cloudUser) {
+                    const pwdHash = await this.sha256(password + '_geowake_salt');
+                    if (cloudUser.password_hash === pwdHash || cloudUser.password_hash === password) {
+                        const sessionUser = {
+                            id: cloudUser.id,
+                            username: cloudUser.username,
+                            name: cloudUser.name || cloudUser.username,
+                            email: cloudUser.email,
+                            mode: 'cloud'
+                        };
+                        this.saveSession(sessionUser, 'token-cloud-' + Date.now(), rememberMe);
+                        this.fetchUserTripsFromDb(cloudUser.id);
+                        return sessionUser;
+                    } else {
+                        throw new Error('Incorrect password. Please try again.');
+                    }
+                }
+            } catch (cloudErr) {
+                if (cloudErr.message && cloudErr.message.includes('password')) {
+                    throw cloudErr;
+                }
+            }
+        }
+
+        // 3. Fallback: Authenticate against Local Storage accounts (offline mode)
         const localAccounts = this.getLocalAccounts();
         const pwdHash = await this.sha256(password + '_geowake_salt');
 
@@ -401,7 +429,53 @@ class AuthManager {
             }
         }
 
-        // 2. Fallback: Register into Local Storage (when server.py is not running)
+        // 2. Try Supabase Cloud Database (e.g. when hosted on Vercel or mobile)
+        if (window.cloudDatabase && window.cloudDatabase.isOnline) {
+            try {
+                const existingCloud = await window.cloudDatabase.fetchUserByUsername(cleanUser);
+                if (existingCloud) {
+                    throw new Error('Username is already taken. Please choose another.');
+                }
+                const pwdHash = await this.sha256(password + '_geowake_salt');
+                const userId = 'usr-cloud-' + Date.now();
+                const newCloudUser = {
+                    id: userId,
+                    username: cleanUser,
+                    name: cleanName || cleanUser,
+                    email: `${cleanUser.toLowerCase()}@geowake.app`,
+                    password_hash: pwdHash,
+                    role: 'user'
+                };
+                await window.cloudDatabase.saveUserOnline(newCloudUser);
+
+                // Cache in local accounts for offline resilience
+                const localAccounts = this.getLocalAccounts();
+                localAccounts.push({
+                    id: userId,
+                    username: cleanUser,
+                    name: cleanName || cleanUser,
+                    passwordHash: pwdHash,
+                    createdAt: new Date().toISOString(),
+                    mode: 'cloud'
+                });
+                this.saveLocalAccounts(localAccounts);
+
+                const sessionUser = {
+                    id: userId,
+                    username: cleanUser,
+                    name: cleanName || cleanUser,
+                    mode: 'cloud'
+                };
+                this.saveSession(sessionUser, 'token-cloud-' + Date.now(), rememberMe);
+                return sessionUser;
+            } catch (cloudErr) {
+                if (cloudErr.message && (cloudErr.message.includes('already taken') || cloudErr.message.includes('Password'))) {
+                    throw cloudErr;
+                }
+            }
+        }
+
+        // 3. Fallback: Register into Local Storage (when server.py and cloud are offline)
         const localAccounts = this.getLocalAccounts();
         const existing = localAccounts.find(u => u.username.toLowerCase() === cleanUser.toLowerCase());
         if (existing) {
@@ -575,7 +649,23 @@ class AuthManager {
                 }
             }
         } catch (e) {
-            // Offline fallback
+            // Server offline, try cloud
+        }
+
+        // 2. Fallback or augment with Supabase Cloud trips
+        if (window.cloudDatabase && targetUserId) {
+            try {
+                const cloudTrips = await window.cloudDatabase.fetchUserTripsOnline(targetUserId);
+                if (Array.isArray(cloudTrips) && cloudTrips.length > 0 && window.app) {
+                    // Merge cloud trips with existing
+                    const existingIds = new Set((window.app.tripHistory || []).map(t => t.id));
+                    const newTrips = cloudTrips.filter(t => !existingIds.has(t.id));
+                    if (newTrips.length > 0 || !window.app.tripHistory || window.app.tripHistory.length === 0) {
+                        window.app.tripHistory = cloudTrips;
+                        window.app.renderTripHistory();
+                    }
+                }
+            } catch (ce) {}
         }
     }
 }

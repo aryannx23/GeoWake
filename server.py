@@ -6,6 +6,8 @@ import hashlib
 import hmac
 import re
 import secrets
+import urllib.request
+import threading
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 
@@ -26,6 +28,88 @@ def load_env():
 load_env()
 PORT = int(os.environ.get('PORT', 8000))
 DB_FILE = os.path.join(os.path.dirname(__file__), 'geowake.db')
+
+# Supabase Cloud Database Configuration
+raw_supabase_url = os.environ.get('SUPABASE_URL', '').strip().rstrip('/')
+if raw_supabase_url.endswith('/rest/v1'):
+    raw_supabase_url = raw_supabase_url[:-8].rstrip('/')
+SUPABASE_URL = raw_supabase_url
+SUPABASE_KEY = os.environ.get('SUPABASE_KEY', '').strip()
+
+def sync_to_supabase_async(table, payload):
+    """Fire-and-forget background synchronization to Supabase Cloud PostgreSQL."""
+    if not SUPABASE_URL or not SUPABASE_KEY:
+        return
+
+    def worker():
+        try:
+            endpoint = f"{SUPABASE_URL}/rest/v1/{table}"
+            headers = {
+                'apikey': SUPABASE_KEY,
+                'Authorization': f'Bearer {SUPABASE_KEY}',
+                'Content-Type': 'application/json',
+                'Prefer': 'resolution=merge-duplicates'
+            }
+            body = json.dumps(payload).encode('utf-8')
+            req = urllib.request.Request(endpoint, data=body, headers=headers, method='POST')
+            with urllib.request.urlopen(req, timeout=5) as resp:
+                pass
+            print(f"[CLOUD SYNC] Synced {table} record to Supabase Cloud successfully.")
+        except Exception as e:
+            print(f"[CLOUD SYNC NOTICE] Supabase sync for {table}: {e}")
+
+    threading.Thread(target=worker, daemon=True).start()
+
+def sync_all_records_to_supabase():
+    """Batch-sync all local users and trips from SQLite to Supabase Cloud Database."""
+    if not SUPABASE_URL or not SUPABASE_KEY:
+        return {'success': False, 'error': 'Supabase not configured in .env'}
+
+    conn = sqlite3.connect(DB_FILE)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+
+    c.execute('SELECT id, username, email, name, password_hash, password_salt, role, created_at, last_login FROM users')
+    users = [dict(r) for r in c.fetchall()]
+
+    c.execute('SELECT * FROM trips')
+    trips = [dict(r) for r in c.fetchall()]
+    conn.close()
+
+    headers = {
+        'apikey': SUPABASE_KEY,
+        'Authorization': f'Bearer {SUPABASE_KEY}',
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates'
+    }
+
+    synced_users = 0
+    synced_trips = 0
+    errors = []
+
+    if users:
+        try:
+            req = urllib.request.Request(f"{SUPABASE_URL}/rest/v1/users", data=json.dumps(users).encode('utf-8'), headers=headers, method='POST')
+            with urllib.request.urlopen(req, timeout=8):
+                synced_users = len(users)
+        except Exception as e:
+            errors.append(f"Users sync error: {e}")
+
+    if trips:
+        try:
+            req = urllib.request.Request(f"{SUPABASE_URL}/rest/v1/trips", data=json.dumps(trips).encode('utf-8'), headers=headers, method='POST')
+            with urllib.request.urlopen(req, timeout=8):
+                synced_trips = len(trips)
+        except Exception as e:
+            errors.append(f"Trips sync error: {e}")
+
+    return {
+        'success': len(errors) == 0,
+        'syncedUsers': synced_users,
+        'syncedTrips': synced_trips,
+        'errors': errors
+    }
+
 
 def hash_password(password, salt=None):
     """Secure password hashing using standard PBKDF2-HMAC-SHA256 (100,000 iterations)."""
@@ -139,6 +223,34 @@ class GeoWakeRequestHandler(SimpleHTTPRequestHandler):
                 'authType': 'username_password',
                 'googleOAuth': False,
                 'status': 'open_access'
+            }).encode('utf-8'))
+            return
+
+        elif parsed.path == '/api/cloud/status':
+            configured = bool(SUPABASE_URL and SUPABASE_KEY)
+            connected = False
+            message = 'Supabase credentials not configured'
+            if configured:
+                try:
+                    req = urllib.request.Request(
+                        f"{SUPABASE_URL}/rest/v1/trips?select=id&limit=1",
+                        headers={'apikey': SUPABASE_KEY, 'Authorization': f'Bearer {SUPABASE_KEY}'}
+                    )
+                    with urllib.request.urlopen(req, timeout=4) as resp:
+                        connected = (resp.status in (200, 206))
+                        message = 'Connected to Supabase PostgreSQL'
+                except Exception as e:
+                    message = str(e)
+
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({
+                'configured': configured,
+                'connected': connected,
+                'provider': 'supabase',
+                'supabaseUrl': SUPABASE_URL,
+                'message': message
             }).encode('utf-8'))
             return
 
@@ -278,6 +390,17 @@ class GeoWakeRequestHandler(SimpleHTTPRequestHandler):
                 INSERT INTO users (id, username, email, name, password_hash, password_salt, role)
                 VALUES (?, ?, ?, ?, ?, ?, 'user')
             ''', (user_id, username, email, display_name, pwd_hash, salt))
+
+            # Auto-sync user to Supabase Cloud Database
+            sync_to_supabase_async('users', {
+                'id': user_id,
+                'username': username,
+                'email': email,
+                'name': display_name,
+                'password_hash': pwd_hash,
+                'password_salt': salt,
+                'role': 'user'
+            })
 
             # Generate Session and Record Login in Database
             session_token = secrets.token_hex(32)
@@ -529,10 +652,37 @@ class GeoWakeRequestHandler(SimpleHTTPRequestHandler):
             conn.commit()
             conn.close()
 
+            # Auto-sync trip to Supabase Cloud Database
+            sync_to_supabase_async('trips', {
+                'id': trip_id,
+                'user_id': user_id,
+                'destination_name': dest_name,
+                'destination_full_name': dest_full,
+                'dest_lat': dest_lat,
+                'dest_lon': dest_lon,
+                'origin_name': origin_name,
+                'origin_lat': origin_lat,
+                'origin_lon': origin_lon,
+                'alert_radius': alert_radius,
+                'alarm_sound': alarm_sound,
+                'route_distance': route_dist,
+                'travel_duration': duration,
+                'status': status
+            })
+
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
             self.end_headers()
             self.wfile.write(json.dumps({'success': True, 'tripId': trip_id}).encode('utf-8'))
+            return
+
+        # ── 6. SYNC ALL LOCAL DATA TO CLOUD ──
+        elif parsed.path == '/api/cloud/sync-all':
+            result = sync_all_records_to_supabase()
+            self.send_response(200 if result.get('success') else 500)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps(result).encode('utf-8'))
             return
 
         self.send_response(404)
@@ -545,4 +695,8 @@ if __name__ == '__main__':
     server = HTTPServer(('0.0.0.0', PORT), GeoWakeRequestHandler)
     print(f"GeoWake Server with SQLite Database running at http://localhost:{PORT}")
     print("Authentication: Simple Username & Password Active")
+    if SUPABASE_URL and SUPABASE_KEY:
+        print(f"Cloud Database Sync: Supabase Active ({SUPABASE_URL})")
+    else:
+        print("Cloud Database Sync: Not configured (add SUPABASE_URL and SUPABASE_KEY to .env)")
     server.serve_forever()
