@@ -22,7 +22,7 @@
     <script src="js/theme.js"></script>
 
     <!-- Custom CSS (Transit Theme) -->
-    <link rel="stylesheet" href="style.css?v=2.7">
+    <link rel="stylesheet" href="style.css?v=2.8">
 </head>
 <body>
 
@@ -585,6 +585,22 @@
                     <div class="map-wrapper-relative">
                         <div id="interactive-map"></div>
                         
+                        <!-- Floating Map Search Bar -->
+                        <div class="map-floating-search-wrap" id="map-floating-search-wrap">
+                            <div class="map-floating-search-box">
+                                <i class="fas fa-magnifying-glass map-search-icon"></i>
+                                <input type="text" id="map-dest-search-input" class="map-search-input" placeholder="Search destination on map..." autocomplete="off" spellcheck="false">
+                                <button type="button" class="btn-clear-map-search hidden" id="btn-clear-map-search" title="Clear search" aria-label="Clear search">
+                                    <i class="fas fa-xmark"></i>
+                                </button>
+                                <button type="button" class="btn-map-search-submit" id="btn-map-search-submit" title="Search destination" aria-label="Search destination">
+                                    <i class="fas fa-arrow-right"></i>
+                                </button>
+                            </div>
+                            <!-- Floating Map Search Dropdown Results -->
+                            <div id="map-search-dropdown" class="map-search-dropdown hidden"></div>
+                        </div>
+
                         <!-- Floating Route Stats Pill (Matches Screenshot Top Badge) -->
                         <div class="map-floating-route-badge" id="map-route-badge">
                             <i class="fas fa-bus" style="color: var(--accent-primary);"></i>
@@ -883,14 +899,14 @@
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
-    <!-- Scripts (v2.7 Dual Strong Alarm Sounds & Audio Synthesizer) -->
-    <script src="js/audio.js?v=2.7"></script>
-    <script src="js/cloud-db.js?v=2.7"></script>
-    <script src="js/auth.js?v=2.7"></script>
-    <script src="js/telemetry.js?v=2.7"></script>
-    <script src="js/geolocation.js?v=2.7"></script>
-    <script src="js/map.js?v=2.7"></script>
-    <script src="js/simulator.js?v=2.7"></script>
-    <script src="js/app.js?v=2.7"></script>
+    <!-- Scripts (v2.8 Map Search Bar & Destination Finder) -->
+    <script src="js/audio.js?v=2.8"></script>
+    <script src="js/cloud-db.js?v=2.8"></script>
+    <script src="js/auth.js?v=2.8"></script>
+    <script src="js/telemetry.js?v=2.8"></script>
+    <script src="js/geolocation.js?v=2.8"></script>
+    <script src="js/map.js?v=2.8"></script>
+    <script src="js/simulator.js?v=2.8"></script>
+    <script src="js/app.js?v=2.8"></script>
 </body>
 </html>

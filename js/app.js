@@ -159,6 +159,14 @@ class GeoWakeApp {
                 this.currentTrip.destinationName,
                 this.currentTrip.alertRadius
             );
+            const mapSearchInput = document.getElementById('map-dest-search-input');
+            const clearMapSearchBtn = document.getElementById('btn-clear-map-search');
+            if (mapSearchInput && !mapSearchInput.value && this.currentTrip.destinationName) {
+                mapSearchInput.value = this.currentTrip.destinationName;
+            }
+            if (clearMapSearchBtn && this.currentTrip.destinationName) {
+                clearMapSearchBtn.classList.remove('hidden');
+            }
         }
 
         window.mapManager.updateUserLocation(
@@ -599,6 +607,9 @@ class GeoWakeApp {
                 this.log('🗺️ Fitted map view to full trip bounds.');
             });
         }
+
+        // Initialize Floating Map Search Bar
+        this.setupMapSearch();
 
         // Remove Destination Button
         const removeDestBtn = document.getElementById('btn-remove-dest');
@@ -1274,9 +1285,16 @@ class GeoWakeApp {
         const nameEl = document.getElementById('current-dest-name');
         const coordsEl = document.getElementById('current-dest-coords');
         const floatNameEl = document.getElementById('mobile-float-dest-name');
+        const mapSearchInput = document.getElementById('map-dest-search-input');
+        const clearMapSearchBtn = document.getElementById('btn-clear-map-search');
+        const panelSearchInput = document.getElementById('dest-search-input');
+
         if (nameEl) nameEl.innerText = name;
         if (coordsEl) coordsEl.innerText = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
         if (floatNameEl) floatNameEl.innerText = name;
+        if (mapSearchInput) mapSearchInput.value = name;
+        if (clearMapSearchBtn) clearMapSearchBtn.classList.remove('hidden');
+        if (panelSearchInput) panelSearchInput.value = name;
 
         // Toggle selected vs empty destination cards
         const selectedDestCard = document.getElementById('selected-dest-card');
@@ -1304,6 +1322,9 @@ class GeoWakeApp {
         const selectedDestCard = document.getElementById('selected-dest-card');
         const noDestCard = document.getElementById('no-dest-card');
         const searchInput = document.getElementById('dest-search-input');
+        const mapSearchInput = document.getElementById('map-dest-search-input');
+        const clearMapSearchBtn = document.getElementById('btn-clear-map-search');
+        const mapSearchDropdown = document.getElementById('map-search-dropdown');
         const pathCard = document.getElementById('travel-path-summary-card');
         const mapBadge = document.getElementById('map-route-badge');
         const floatNameEl = document.getElementById('mobile-float-dest-name');
@@ -1312,6 +1333,9 @@ class GeoWakeApp {
         if (selectedDestCard) selectedDestCard.classList.add('hidden');
         if (noDestCard) noDestCard.classList.remove('hidden');
         if (searchInput) searchInput.value = '';
+        if (mapSearchInput) mapSearchInput.value = '';
+        if (clearMapSearchBtn) clearMapSearchBtn.classList.add('hidden');
+        if (mapSearchDropdown) mapSearchDropdown.classList.add('hidden');
         if (pathCard) pathCard.classList.add('hidden');
         if (mapBadge) mapBadge.classList.add('hidden');
         if (floatNameEl) floatNameEl.innerText = 'No destination chosen';
@@ -1330,6 +1354,173 @@ class GeoWakeApp {
         }
 
         this.log('🗑️ Destination removed. Click anywhere on map or search to choose a stop.');
+    }
+
+    /**
+     * Map Floating Search Bar Controller
+     */
+    setupMapSearch() {
+        const searchWrap = document.getElementById('map-floating-search-wrap');
+        const searchInput = document.getElementById('map-dest-search-input');
+        const clearBtn = document.getElementById('btn-clear-map-search');
+        const submitBtn = document.getElementById('btn-map-search-submit');
+        const dropdown = document.getElementById('map-search-dropdown');
+
+        if (!searchInput || !dropdown) return;
+
+        // Stop clicks and scroll inside the search bar from propagating to Leaflet map canvas
+        if (searchWrap && window.L && L.DomEvent) {
+            L.DomEvent.disableClickPropagation(searchWrap);
+            L.DomEvent.disableScrollPropagation(searchWrap);
+        }
+
+        let debounceTimer = null;
+        let lastPlaces = [];
+
+        const executeSearch = async () => {
+            const query = searchInput.value.trim();
+            if (query.length < 2) {
+                dropdown.classList.add('hidden');
+                return;
+            }
+
+            dropdown.innerHTML = `
+                <div class="map-search-loading">
+                    <i class="fas fa-spinner fa-spin" style="color: var(--accent-primary);"></i>
+                    <span>Finding destination on map...</span>
+                </div>
+            `;
+            dropdown.classList.remove('hidden');
+
+            try {
+                const places = await window.mapManager.searchPlace(query);
+                lastPlaces = places;
+                this.renderMapSearchResults(places);
+            } catch (err) {
+                dropdown.innerHTML = `
+                    <div class="map-search-empty">
+                        <i class="fas fa-circle-exclamation" style="color: var(--accent-danger);"></i>
+                        <span>Search temporarily unavailable</span>
+                    </div>
+                `;
+            }
+        };
+
+        searchInput.addEventListener('input', (e) => {
+            const val = e.target.value;
+            if (clearBtn) {
+                if (val.length > 0) clearBtn.classList.remove('hidden');
+                else clearBtn.classList.add('hidden');
+            }
+
+            clearTimeout(debounceTimer);
+            if (val.trim().length < 2) {
+                dropdown.classList.add('hidden');
+                return;
+            }
+            debounceTimer = setTimeout(executeSearch, 350);
+        });
+
+        searchInput.addEventListener('keydown', async (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                clearTimeout(debounceTimer);
+                if (lastPlaces.length > 0 && !dropdown.classList.contains('hidden')) {
+                    this.selectMapSearchResult(lastPlaces[0]);
+                } else {
+                    await executeSearch();
+                    if (lastPlaces.length > 0) {
+                        this.selectMapSearchResult(lastPlaces[0]);
+                    }
+                }
+            } else if (e.key === 'Escape') {
+                dropdown.classList.add('hidden');
+            }
+        });
+
+        if (submitBtn) {
+            submitBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                executeSearch();
+            });
+        }
+
+        if (clearBtn) {
+            clearBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                searchInput.value = '';
+                clearBtn.classList.add('hidden');
+                dropdown.classList.add('hidden');
+                searchInput.focus();
+            });
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (searchWrap && !searchWrap.contains(e.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+    }
+
+    renderMapSearchResults(places) {
+        const dropdown = document.getElementById('map-search-dropdown');
+        if (!dropdown) return;
+
+        if (!places || places.length === 0) {
+            dropdown.innerHTML = `
+                <div class="map-search-empty">
+                    <i class="fas fa-map-pin" style="color: var(--text-muted);"></i>
+                    <span>No destinations found. Try station name, city, or landmark.</span>
+                </div>
+            `;
+            dropdown.classList.remove('hidden');
+            return;
+        }
+
+        dropdown.innerHTML = places.map((place, idx) => `
+            <div class="map-search-item" data-index="${idx}">
+                <div class="map-search-item-icon">
+                    <i class="fas fa-location-dot"></i>
+                </div>
+                <div class="map-search-item-info">
+                    <div class="map-search-item-title">${place.name}</div>
+                    <div class="map-search-item-sub">${place.fullName}</div>
+                </div>
+                <span class="map-search-item-badge">Set</span>
+            </div>
+        `).join('');
+
+        dropdown.classList.remove('hidden');
+
+        dropdown.querySelectorAll('.map-search-item').forEach((item, idx) => {
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const selected = places[idx];
+                this.selectMapSearchResult(selected);
+            });
+        });
+    }
+
+    selectMapSearchResult(place) {
+        if (!place) return;
+        const dropdown = document.getElementById('map-search-dropdown');
+        const mapSearchInput = document.getElementById('map-dest-search-input');
+        const clearBtn = document.getElementById('btn-clear-map-search');
+        const panelSearchInput = document.getElementById('dest-search-input');
+
+        if (dropdown) dropdown.classList.add('hidden');
+        if (mapSearchInput) mapSearchInput.value = place.name;
+        if (clearBtn) clearBtn.classList.remove('hidden');
+        if (panelSearchInput) panelSearchInput.value = place.name;
+
+        // Set destination
+        this.setDestination(place.name, place.fullName, place.lat, place.lon);
+
+        // Smooth cinematic pan to destination on map
+        if (window.mapManager) {
+            window.mapManager.centerOnDestination(15);
+        }
     }
 
     setAlertRadius(radiusMeters) {
