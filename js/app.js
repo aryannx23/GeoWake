@@ -238,13 +238,18 @@ class GeoWakeApp {
             toast.className = 'geowake-toast-pill';
             document.body.appendChild(toast);
         }
-        const iconClass = type === 'warning' ? 'fas fa-shield-halved' : (type === 'success' ? 'fas fa-circle-check' : 'fas fa-bell');
+        let iconClass = 'fas fa-location-arrow';
+        if (type === 'success' || message.toLowerCase().includes('started')) iconClass = 'fas fa-circle-play';
+        else if (type === 'ended' || type === 'stop' || message.toLowerCase().includes('ended') || message.toLowerCase().includes('stopped')) iconClass = 'fas fa-circle-stop';
+        else if (type === 'warning') iconClass = 'fas fa-shield-halved';
+        else if (type === 'info') iconClass = 'fas fa-circle-check';
+
         toast.innerHTML = `<i class="${iconClass}"></i> <span>${message}</span>`;
         toast.classList.add('visible');
         if (this._toastTimer) clearTimeout(this._toastTimer);
         this._toastTimer = setTimeout(() => {
             toast.classList.remove('visible');
-        }, 4000);
+        }, 2600);
     }
 
     init() {
@@ -1800,7 +1805,7 @@ class GeoWakeApp {
             window.tripSimulator.pause();
             window.liveTracker.startTracking();
             this.log(`🟢 Live GPS Active for "${this.currentTrip.destinationName}". Moves ONLY when your device physically moves.`);
-            this.showToast(`🛰️ Live GPS Active. Monitoring in background.`, 'success');
+            this.showToast('Trip Started', 'success');
         } else {
             if (activeModeBadge) {
                 activeModeBadge.innerHTML = '<i class="fas fa-train"></i> ROUTE SIMULATION ACTIVE';
@@ -1808,7 +1813,7 @@ class GeoWakeApp {
             window.liveTracker.stopTracking();
             window.tripSimulator.start();
             this.log(`🟢 Journey Simulation Started for "${this.currentTrip.destinationName}".`);
-            this.showToast(`🚆 Trip Started. Monitoring in background.`, 'success');
+            this.showToast('Trip Started', 'success');
         }
     }
 
@@ -1839,7 +1844,7 @@ class GeoWakeApp {
             this.recordHistory(this.currentTrip.destinationName, `${this.currentTrip.alertRadius} m`, 'Completed');
         }
         this.log(`🛑 ${reason}. Service stopped.`);
-        this.showToast(`🛑 ${reason}.`, 'info');
+        this.showToast('Trip Ended', 'ended');
     }
 
     handleLocationSample(sample) {

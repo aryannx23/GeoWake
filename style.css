@@ -5416,31 +5416,32 @@ button {
     }
 }
 
-/* Glassmorphic App Notification Toast */
+/* Glassmorphic App Notification Toast (Compact) */
 .geowake-toast-pill {
     position: fixed;
-    top: 24px;
+    top: 18px;
     left: 50%;
     transform: translateX(-50%) translateY(-100px);
-    background: rgba(15, 23, 42, 0.92);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+    background: rgba(15, 23, 42, 0.94);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     color: #F8FAFC;
-    border: 1px solid rgba(255, 107, 53, 0.4);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
-    padding: 10px 20px;
+    border: 1px solid rgba(255, 107, 53, 0.45);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    padding: 6px 14px;
     border-radius: 9999px;
-    font-size: 0.88rem;
+    font-size: 0.76rem;
     font-weight: 600;
+    letter-spacing: 0.2px;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 7px;
     z-index: 999999;
     opacity: 0;
     pointer-events: none;
-    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-    max-width: 90vw;
-    text-align: center;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    max-width: 85vw;
+    white-space: nowrap;
 }
 
 .geowake-toast-pill.visible {
@@ -5451,6 +5452,6 @@ button {
 
 .geowake-toast-pill i {
     color: var(--accent-primary, #FF6B35);
-    font-size: 1rem;
+    font-size: 0.82rem;
 }
 
