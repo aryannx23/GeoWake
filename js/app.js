@@ -204,6 +204,10 @@ class GeoWakeApp {
         if (mapBadgeTime) mapBadgeTime.innerText = formattedDuration;
         if (mapBadgeDist) mapBadgeDist.innerText = formattedDistance;
 
+        // Update mobile floating quick card ETA
+        const floatEta = document.getElementById('mobile-float-eta');
+        if (floatEta) floatEta.innerText = `${formattedDistance} • ~${formattedDuration}`;
+
         // Update active trip card ETA
         const activeEtaEl = document.getElementById('active-eta-val');
         if (activeEtaEl) {
@@ -216,6 +220,33 @@ class GeoWakeApp {
         }
 
         this.log(`🛣️ Suitable Path: ${formattedDistance} • Est. Travel Time: ${formattedDuration} (Arrival ~${expectedArrival})`);
+    }
+
+    switchMobileTab(tabName) {
+        const layoutGrid = document.getElementById('app-layout-grid');
+        const tabMap = document.getElementById('mobile-tab-map');
+        const tabSetup = document.getElementById('mobile-tab-setup');
+
+        if (layoutGrid) {
+            layoutGrid.dataset.activeTab = tabName;
+        }
+
+        if (tabName === 'map') {
+            if (tabMap) tabMap.classList.add('active');
+            if (tabSetup) tabSetup.classList.remove('active');
+            if (window.mapManager && window.mapManager.map) {
+                setTimeout(() => {
+                    window.mapManager.map.invalidateSize();
+                }, 50);
+                setTimeout(() => {
+                    window.mapManager.map.invalidateSize();
+                }, 250);
+            }
+        } else {
+            if (tabSetup) tabSetup.classList.add('active');
+            if (tabMap) tabMap.classList.remove('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
     }
 
     isUserAuthenticated() {
@@ -880,6 +911,42 @@ class GeoWakeApp {
                 });
             }
         });
+
+        // Mobile View Segmented Tabs Switcher
+        const tabMapBtn = document.getElementById('mobile-tab-map');
+        const tabSetupBtn = document.getElementById('mobile-tab-setup');
+        if (tabMapBtn) {
+            tabMapBtn.addEventListener('click', () => this.switchMobileTab('map'));
+        }
+        if (tabSetupBtn) {
+            tabSetupBtn.addEventListener('click', () => this.switchMobileTab('setup'));
+        }
+
+        // Mobile Floating Action Bar Buttons
+        const btnMobileSettings = document.getElementById('btn-mobile-open-settings');
+        if (btnMobileSettings) {
+            btnMobileSettings.addEventListener('click', () => this.switchMobileTab('setup'));
+        }
+
+        const btnMobileStart = document.getElementById('btn-mobile-start-trip');
+        if (btnMobileStart) {
+            btnMobileStart.addEventListener('click', () => {
+                if (this.state === 'ACTIVE') {
+                    this.stopTrip('Trip Cancelled from Mobile Map');
+                } else {
+                    this.startTrip();
+                }
+            });
+        }
+
+        // Mobile Simulator Drawer Toggle
+        const btnToggleSim = document.getElementById('btn-toggle-mobile-sim');
+        if (btnToggleSim) {
+            btnToggleSim.addEventListener('click', () => {
+                const accordion = btnToggleSim.closest('.mobile-sim-accordion');
+                if (accordion) accordion.classList.toggle('open');
+            });
+        }
     }
 
     updateAuthUi(user) {
@@ -1127,8 +1194,10 @@ class GeoWakeApp {
         // Update UI
         const nameEl = document.getElementById('current-dest-name');
         const coordsEl = document.getElementById('current-dest-coords');
+        const floatNameEl = document.getElementById('mobile-float-dest-name');
         if (nameEl) nameEl.innerText = name;
         if (coordsEl) coordsEl.innerText = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+        if (floatNameEl) floatNameEl.innerText = name;
 
         // Toggle selected vs empty destination cards
         const selectedDestCard = document.getElementById('selected-dest-card');
@@ -1158,12 +1227,16 @@ class GeoWakeApp {
         const searchInput = document.getElementById('dest-search-input');
         const pathCard = document.getElementById('travel-path-summary-card');
         const mapBadge = document.getElementById('map-route-badge');
+        const floatNameEl = document.getElementById('mobile-float-dest-name');
+        const floatEta = document.getElementById('mobile-float-eta');
 
         if (selectedDestCard) selectedDestCard.classList.add('hidden');
         if (noDestCard) noDestCard.classList.remove('hidden');
+        if (searchInput) searchInput.value = '';
         if (pathCard) pathCard.classList.add('hidden');
         if (mapBadge) mapBadge.classList.add('hidden');
-        if (searchInput) searchInput.value = '';
+        if (floatNameEl) floatNameEl.innerText = 'No destination chosen';
+        if (floatEta) floatEta.innerText = 'Click map or search';
 
         // Clear from map & pause simulator
         window.mapManager.clearDestination();
@@ -1244,6 +1317,13 @@ class GeoWakeApp {
         document.getElementById('setup-card-panel').classList.add('hidden');
         document.getElementById('active-trip-panel').classList.remove('hidden');
 
+        // On mobile, auto-switch to live map tab so traveler sees tracking immediately
+        this.switchMobileTab('map');
+        const floatBtn = document.getElementById('btn-mobile-start-trip');
+        const floatLabel = document.getElementById('mobile-float-btn-label');
+        if (floatBtn) floatBtn.classList.add('is-active-trip');
+        if (floatLabel) floatLabel.innerText = 'Stop Alarm';
+
         const activeModeBadge = document.getElementById('active-tracking-mode-badge');
 
         if (this.trackingMode === 'LIVE') {
@@ -1272,6 +1352,11 @@ class GeoWakeApp {
 
         document.getElementById('setup-card-panel').classList.remove('hidden');
         document.getElementById('active-trip-panel').classList.add('hidden');
+
+        const floatBtn = document.getElementById('btn-mobile-start-trip');
+        const floatLabel = document.getElementById('mobile-float-btn-label');
+        if (floatBtn) floatBtn.classList.remove('is-active-trip');
+        if (floatLabel) floatLabel.innerText = 'Start Alarm';
 
         const autoMoveBtn = document.getElementById('btn-auto-move');
         if (autoMoveBtn) autoMoveBtn.innerHTML = '<i class="fas fa-play"></i> Auto-Move Towards Dest';
@@ -1381,6 +1466,13 @@ class GeoWakeApp {
             } else if (result) {
                 progressFill.style.width = `${Math.min(100, Math.max(5, Math.round((1 - (result.distance / 50000)) * 100)))}%`;
             }
+        }
+
+        // Update mobile floating quick card with live remaining stats
+        const floatEtaEl = document.getElementById('mobile-float-eta');
+        if (floatEtaEl && result && this.state === 'ACTIVE') {
+            const formattedD = window.telemetryEngine.formatDistance(result.distance);
+            floatEtaEl.innerText = `${formattedD} remaining • ${sample.speedKmh} km/h`;
         }
 
         // Telemetry Inspector Drawer Updates

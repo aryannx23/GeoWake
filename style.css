@@ -388,88 +388,160 @@ button {
     flex-shrink: 0;
 }
 
-/* ── HIGH-CONTRAST HOME NAVBAR BUTTONS ────────────────────────────── */
-.transit-nav-bar .icon-round-btn {
-    background: rgba(255, 255, 255, 0.28);
-    border: 1.5px solid rgba(255, 255, 255, 0.55);
+/* ── CAPSULE NAVBAR BUTTONS (HOME / LANDING SCREEN) ──────────────── */
+.transit-nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nav-capsule-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 36px;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.14);
+    border: 1.5px solid rgba(255, 255, 255, 0.38);
+    color: #FFFFFF;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    padding: 0;
+    flex-shrink: 0;
+}
+
+[data-theme="dark"] .nav-capsule-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1.5px solid rgba(255, 255, 255, 0.22);
+}
+
+.nav-capsule-btn:hover {
+    background: rgba(255, 255, 255, 0.26);
+    border-color: rgba(255, 255, 255, 0.65);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.20);
+}
+
+.nav-capsule-btn i {
+    font-size: 1rem;
+    color: #FFFFFF;
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+/* Specific styling for the sun theme icon in reference (soft sky blue) */
+.nav-capsule-btn.btn-theme-toggle .theme-icon-light {
+    color: #60A5FA !important;
+    font-size: 1.05rem;
+}
+
+.nav-capsule-btn.btn-theme-toggle .theme-icon-dark {
+    color: #93C5FD !important;
+    font-size: 1.05rem;
+}
+
+.nav-capsule-btn:hover i {
+    transform: scale(1.08);
+}
+
+/* User Profile Badge (Logged In State Capsule) */
+.user-nav-badge.nav-capsule-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 36px;
+    padding: 0 10px 0 6px;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.14);
+    border: 1.5px solid rgba(255, 255, 255, 0.38);
     color: #FFFFFF;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
-.transit-nav-bar .icon-round-btn:hover {
-    background: #FFFFFF;
-    color: var(--accent-primary);
-    border-color: #FFFFFF;
+[data-theme="dark"] .user-nav-badge.nav-capsule-badge {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.22);
 }
 
-.transit-nav-bar .btn-auth-nav {
-    background: rgba(255, 255, 255, 0.28);
-    border: 1.5px solid rgba(255, 255, 255, 0.55);
-    color: #FFFFFF;
+.user-nav-badge.nav-capsule-badge .user-avatar-initial {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #FFFFFF;
+    color: var(--accent-primary);
+    font-size: 0.75rem;
     font-weight: 800;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.transit-nav-bar .btn-auth-nav:hover {
-    background: #FFFFFF;
-    color: var(--accent-primary);
-    border-color: #FFFFFF;
-}
-
-.transit-nav-bar .btn-profile-dropdown {
-    background: rgba(255, 255, 255, 0.28);
-    border: 1.5px solid rgba(255, 255, 255, 0.55);
+.user-nav-badge.nav-capsule-badge .user-nav-username {
+    font-size: 0.82rem;
+    font-weight: 700;
     color: #FFFFFF;
+}
+
+.user-nav-badge.nav-capsule-badge .btn-sign-out {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    padding: 2px;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    transition: color 0.15s ease;
+}
+
+.user-nav-badge.nav-capsule-badge .btn-sign-out:hover {
+    color: #FFFFFF;
+}
+
+/* The White "Open App" Button matching screenshot */
+.transit-nav-bar .btn-nav-launch {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 36px;
+    padding: 0 20px;
+    background: #FFFFFF !important;
+    color: #FF6B35 !important;
+    border: none;
+    border-radius: 9999px;
+    font-family: var(--font-heading);
+    font-size: 0.95rem;
     font-weight: 800;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    letter-spacing: -0.01em;
+    cursor: pointer;
+    box-shadow: 0 3px 14px rgba(0, 0, 0, 0.14);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    flex-shrink: 0;
 }
 
-.transit-nav-bar .btn-profile-dropdown:hover,
-.transit-nav-bar .btn-profile-dropdown.active {
-    background: #FFFFFF;
-    color: var(--accent-primary);
-    border-color: #FFFFFF;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
-}
-
-.transit-nav-bar .btn-profile-dropdown:hover i,
-.transit-nav-bar .btn-profile-dropdown.active i {
-    color: var(--accent-primary);
-}
-
-.btn-profile-dropdown .fa-chevron-down {
+.transit-nav-bar .btn-nav-launch i {
+    color: #FF6B35 !important;
+    font-size: 0.92rem;
     transition: transform 0.2s ease;
 }
 
-.btn-profile-dropdown.active .fa-chevron-down {
-    transform: rotate(180deg);
-}
-
-.transit-nav-bar .btn-theme-toggle {
-    background: rgba(255, 255, 255, 0.28);
-    border: 1.5px solid rgba(255, 255, 255, 0.55);
-    color: #FFFFFF;
+.transit-nav-bar .btn-nav-launch span {
+    color: #FF6B35 !important;
     font-weight: 800;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
-.transit-nav-bar .btn-theme-toggle i {
-    color: #FFE600;
-    font-size: 0.92rem;
+.transit-nav-bar .btn-nav-launch:hover {
+    background: #FFFFFF !important;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.22);
 }
 
-[data-theme="dark"] .transit-nav-bar .btn-theme-toggle i {
-    color: #82C0FF;
-}
-
-.transit-nav-bar .btn-theme-toggle:hover {
-    background: #FFFFFF;
-    color: var(--accent-primary);
-    border-color: #FFFFFF;
-}
-
-.transit-nav-bar .btn-theme-toggle:hover i {
-    color: var(--accent-primary);
+.transit-nav-bar .btn-nav-launch:hover i {
+    transform: translate(2px, -2px);
 }
 
 .profile-dropdown-menu {
@@ -2343,53 +2415,131 @@ button {
 }
 
 /* Alert Radius Selection Grid */
+/* Alert Radius Selection Grid */
 .radius-buttons-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
+    gap: 8px;
 }
 
 .radius-btn {
-    padding: 8px;
+    padding: 10px 8px;
     background: var(--bg-main);
-    border: 1px solid var(--border-subtle);
+    border: 1.5px solid var(--border-subtle);
     border-radius: var(--radius-sm);
     color: var(--text-secondary);
-    font-size: 0.78rem;
+    font-size: 0.82rem;
     font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.radius-btn:hover {
+    border-color: var(--accent-primary-light);
+    color: var(--accent-primary);
+    background: var(--bg-surface-hover);
 }
 
 .radius-btn.active {
     background: var(--accent-primary);
     color: #FFF;
     border-color: var(--accent-primary);
-    box-shadow: 0 2px 8px var(--accent-primary-glow);
+    box-shadow: 0 4px 14px var(--accent-primary-glow);
+}
+
+.slider-with-hints {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+}
+
+.slider-ticks-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.70rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-top: 4px;
 }
 
 .minimal-slider {
     width: 100%;
     accent-color: var(--accent-primary);
-    margin-top: 4px;
-    height: 5px;
+    height: 6px;
     cursor: pointer;
+    border-radius: 9999px;
 }
 
 /* Sound Options */
+.sound-pills-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    width: 100%;
+}
+
 .sound-pill-opt {
-    padding: 6px 12px;
+    padding: 10px 12px;
     background: var(--bg-main);
-    border: 1px solid var(--border-subtle);
+    border: 1.5px solid var(--border-subtle);
     border-radius: var(--radius-sm);
-    font-size: 0.76rem;
+    font-size: 0.80rem;
     color: var(--text-secondary);
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    user-select: none;
+}
+
+.sound-opt-icon {
+    font-size: 0.92rem;
+    color: var(--accent-primary);
+}
+
+.sound-opt-title {
+    font-weight: 700;
+    color: var(--text-primary);
+    flex: 1;
+    font-size: 0.82rem;
+}
+
+.sound-opt-play {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--border-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    transition: all 0.2s ease;
+}
+
+.sound-pill-opt:hover {
+    border-color: var(--accent-primary-light);
+    background: var(--bg-surface-hover);
 }
 
 .sound-pill-opt.selected {
     background: var(--accent-primary-pale);
     border-color: var(--accent-primary);
+    box-shadow: 0 3px 12px var(--accent-primary-glow);
+}
+
+.sound-pill-opt.selected .sound-opt-title {
     color: var(--accent-primary);
-    font-weight: 700;
+}
+
+.sound-pill-opt.selected .sound-opt-play {
+    background: var(--accent-primary);
+    color: #FFF;
 }
 
 /* Primary Big Orange Button (Matches "BUY TICKET / CALL DRIVER" from screenshot) */
@@ -4059,57 +4209,263 @@ button {
     }
 }
 
+/* ── DESKTOP DEFAULTS FOR MOBILE-SPECIFIC ELEMENTS ───────────────── */
+.mobile-view-tabs {
+    display: none;
+}
+
+.mobile-map-floating-card {
+    display: none;
+}
+
+.mobile-sim-accordion-toggle {
+    display: none;
+}
+
+.mobile-sim-accordion-body {
+    display: block;
+}
+
+@keyframes slideUpFloat {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ── PHONE & SMALL TABLET VIEWPORT (< 768px) ───────────────────────── */
 @media (max-width: 767px) {
+    /* 1. App Navigation & Header Compact Optimization */
+    .app-transit-header {
+        padding: 10px 12px;
+        gap: 8px;
+    }
+
+    .track-bus-title {
+        font-size: 1.05rem;
+        max-width: 140px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .btn-transit-back {
+        width: 34px;
+        height: 34px;
+        font-size: 0.88rem;
+    }
+
+    .app-transit-nav-right {
+        gap: 6px;
+    }
+
+    .app-transit-header .icon-round-btn,
+    .app-transit-header .btn-theme-toggle {
+        width: 34px;
+        height: 34px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .app-transit-header .theme-text {
+        display: none !important;
+    }
+
+    .app-transit-header .btn-auth-nav {
+        padding: 6px 10px;
+        font-size: 0.80rem;
+    }
+
+    .app-transit-header .btn-auth-nav span {
+        display: none !important;
+    }
+
+    #app-status-badge {
+        display: none !important;
+    }
+
+    .app-transit-header .user-nav-username {
+        display: none !important;
+    }
+
+    /* 2. Landing Page Hero & Navigation */
     .transit-hero-section {
-        padding: 16px 16px 36px;
-        border-radius: 0 0 24px 24px;
+        padding: 14px 14px 32px;
+        border-radius: 0 0 20px 20px;
+    }
+
+    .transit-nav-bar {
+        gap: 8px;
+    }
+
+    .brand-sub-badge {
+        display: none;
+    }
+
+    .transit-nav-actions {
+        gap: 6px;
+        flex-shrink: 0;
+    }
+
+    .nav-capsule-btn {
+        width: 44px;
+        height: 34px;
+    }
+
+    .nav-capsule-btn i {
+        font-size: 0.90rem;
+    }
+
+    .transit-nav-bar .btn-nav-launch {
+        height: 34px;
+        padding: 0 14px;
+        font-size: 0.88rem;
+        gap: 6px;
     }
 
     .landing-hero-heading {
-        font-size: 1.85rem;
+        font-size: 1.75rem;
+        line-height: 1.25;
     }
 
     .landing-hero-desc {
-        font-size: 0.95rem;
+        font-size: 0.90rem;
+        line-height: 1.5;
     }
 
     .hero-actions-group {
         flex-direction: column;
         width: 100%;
+        gap: 10px;
     }
 
     .hero-cta-primary,
     .hero-cta-secondary {
         width: 100%;
         justify-content: center;
+        padding: 14px;
     }
 
+    .hero-perks-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        padding: 0 8px;
+    }
+
+    /* 3. Mobile Segmented Tab Switcher (Live Map vs Trip Options) */
     .app-workspace {
-        padding: 12px 10px 80px;
+        padding: 10px 10px calc(24px + env(safe-area-inset-bottom));
     }
 
+    .mobile-view-tabs {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        background: var(--bg-card);
+        border: 1px solid var(--border-medium);
+        border-radius: var(--radius-md);
+        padding: 4px;
+        gap: 6px;
+        margin-bottom: 12px;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+        position: sticky;
+        top: 56px;
+        z-index: 1000;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+    }
+
+    .mobile-tab-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 10px 12px;
+        border-radius: var(--radius-sm);
+        border: none;
+        background: transparent;
+        color: var(--text-secondary);
+        font-size: 0.88rem;
+        font-weight: 700;
+        font-family: var(--font-heading);
+        cursor: pointer;
+        transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+        min-height: 44px;
+    }
+
+    .mobile-tab-btn.active {
+        background: var(--accent-primary);
+        color: #FFFFFF;
+        box-shadow: 0 3px 12px var(--accent-primary-glow);
+    }
+
+    .mobile-tab-badge {
+        font-size: 0.65rem;
+        padding: 2px 7px;
+        border-radius: 9999px;
+        background: var(--transit-green-pale);
+        color: var(--transit-green);
+        font-weight: 800;
+    }
+
+    .mobile-tab-btn.active .mobile-tab-badge {
+        background: rgba(255, 255, 255, 0.25);
+        color: #FFFFFF;
+    }
+
+    /* 4. Tab Pane Visibility Logic */
+    .app-layout-grid[data-active-tab="map"] #trip-controller-card {
+        display: none;
+    }
+
+    .app-layout-grid[data-active-tab="map"] #map-workspace-card {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .app-layout-grid[data-active-tab="setup"] #trip-controller-card {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        animation: fadeIn 0.2s ease;
+    }
+
+    .app-layout-grid[data-active-tab="setup"] #map-workspace-card {
+        display: none;
+    }
+
+    /* 5. Mobile Map Sizing & Floating Bottom Bar */
     #interactive-map {
-        height: 340px;
+        height: calc(100dvh - 200px);
+        min-height: 420px;
+        border-radius: var(--radius-lg);
     }
 
     .map-floating-controls {
         top: 10px;
         right: 10px;
-        gap: 5px;
+        gap: 6px;
     }
 
     .map-fab-btn {
-        width: 34px;
-        height: 34px;
-        font-size: 0.82rem;
+        width: 38px;
+        height: 38px;
+        font-size: 0.88rem;
     }
 
     .map-floating-route-badge {
         top: 10px;
         left: 10px;
-        padding: 6px 12px;
-        font-size: 0.74rem;
-        max-width: calc(100% - 58px);
+        padding: 7px 12px;
+        font-size: 0.76rem;
+        max-width: calc(100% - 64px);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -4117,6 +4473,280 @@ button {
 
     .leaflet-control-zoom {
         margin-right: 10px !important;
-        margin-bottom: 10px !important;
+        margin-bottom: 90px !important;
+    }
+
+    .leaflet-control-scale {
+        margin-left: 12px !important;
+        margin-bottom: 90px !important;
+    }
+
+    .mobile-map-floating-card {
+        position: absolute;
+        bottom: 12px;
+        left: 10px;
+        right: 10px;
+        z-index: 1000;
+        background: var(--bg-glass);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid var(--border-medium);
+        border-radius: var(--radius-lg);
+        padding: 12px 14px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.16);
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        animation: slideUpFloat 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .mobile-floating-dest-wrap {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .mobile-floating-dest-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--accent-primary-pale);
+        color: var(--accent-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+
+    .mobile-floating-dest-text {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .mobile-floating-dest-name {
+        font-family: var(--font-heading);
+        font-size: 0.94rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .mobile-floating-eta {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: var(--accent-primary);
+    }
+
+    .mobile-floating-actions {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 8px;
+    }
+
+    .mobile-btn-quick-options {
+        padding: 10px 14px;
+        background: var(--bg-main);
+        border: 1.5px solid var(--border-medium);
+        border-radius: var(--radius-sm);
+        color: var(--text-primary);
+        font-weight: 700;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        min-height: 44px;
+    }
+
+    .mobile-btn-quick-start {
+        padding: 10px 16px;
+        background: var(--gradient-primary);
+        border: none;
+        border-radius: var(--radius-sm);
+        color: #FFFFFF;
+        font-weight: 800;
+        font-family: var(--font-heading);
+        font-size: 0.94rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        cursor: pointer;
+        min-height: 44px;
+        box-shadow: 0 4px 16px var(--accent-primary-glow);
+    }
+
+    .mobile-btn-quick-start.is-active-trip {
+        background: var(--accent-danger);
+        box-shadow: 0 4px 16px var(--accent-danger-pale);
+    }
+
+    /* 6. Mobile Collapsible Simulator Accordion */
+    .mobile-sim-accordion {
+        margin-top: 12px;
+    }
+
+    .mobile-sim-accordion-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        padding: 12px 14px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-md);
+        color: var(--text-primary);
+        font-family: var(--font-heading);
+        font-size: 0.88rem;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: var(--card-shadow);
+        min-height: 44px;
+        transition: all 0.2s ease;
+    }
+
+    .accordion-right {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .accordion-sub-tag {
+        font-size: 0.65rem;
+        padding: 2px 7px;
+        border-radius: 9999px;
+        background: var(--accent-primary-pale);
+        color: var(--accent-primary);
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    .accordion-chevron {
+        font-size: 0.82rem;
+        color: var(--text-muted);
+        transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .mobile-sim-accordion.open .accordion-chevron {
+        transform: rotate(180deg);
+    }
+
+    .mobile-sim-accordion-body {
+        display: none;
+        margin-top: 8px;
+        animation: fadeIn 0.2s ease;
+    }
+
+    .mobile-sim-accordion.open .mobile-sim-accordion-body {
+        display: block;
+    }
+
+    /* 7. Trip Settings Arrangement on Phone */
+    .trip-controller-card {
+        padding: 16px;
+        gap: 14px;
+        border-radius: var(--radius-md);
+    }
+
+    .live-location-card {
+        padding: 10px 12px;
+    }
+
+    .live-gps-stats-mini {
+        font-size: 0.72rem;
+        gap: 8px;
+    }
+
+    .radius-buttons-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+    }
+
+    .radius-btn {
+        min-height: 42px;
+        font-size: 0.80rem;
+    }
+
+    .sound-pills-row {
+        grid-template-columns: 1fr;
+        gap: 6px;
+    }
+
+    .sound-pill-opt {
+        min-height: 44px;
+        padding: 10px 14px;
+    }
+
+    .btn-primary-action {
+        min-height: 48px;
+        font-size: 1rem;
+    }
+
+    /* 8. Active Trip Dashboard on Mobile */
+    .active-trip-card {
+        padding: 16px;
+    }
+
+    .active-trip-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .btn-stop-trip {
+        min-height: 48px;
+        font-size: 1rem;
+    }
+
+    /* 9. Telemetry Clean Grid on Mobile */
+    .telemetry-bar-clean {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        padding: 10px;
+    }
+
+    .tele-item {
+        font-size: 0.72rem;
+    }
+
+    /* 10. Modals Optimization (Auth, History, Alarm Wake-up) */
+    .auth-modal-card,
+    .history-modal-card {
+        width: calc(100% - 24px);
+        max-width: 420px;
+        padding: 18px 16px;
+        border-radius: var(--radius-lg);
+    }
+
+    .alarm-content-box {
+        width: calc(100% - 24px);
+        padding: 30px 18px;
+        border-radius: var(--radius-lg);
+    }
+
+    .alarm-title {
+        font-size: 1.85rem;
+    }
+
+    .alarm-destination-name {
+        font-size: 1.20rem;
+    }
+
+    /* 11. iOS Auto-Zoom Fix for Form Inputs */
+    input[type="text"],
+    input[type="password"],
+    input[type="search"],
+    select {
+        font-size: 16px !important;
+    }
+
+    button, .sound-pill-opt, .radius-btn, .mobile-tab-btn {
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
     }
 }

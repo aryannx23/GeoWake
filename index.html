@@ -43,20 +43,13 @@
                 </div>
 
                 <div class="transit-nav-actions">
-                    <!-- Saved Trips History -->
-                    <button id="btn-toggle-history-landing" class="btn-auth-nav" title="View Saved Trip History">
-                        <i class="fas fa-clock-rotate-left"></i>
-                        <span>Trip History</span>
-                    </button>
-
-                    <!-- User Account / Sign In Pill (Logged Out State) -->
-                    <button id="btn-open-auth-landing" class="btn-auth-nav btn-auth-trigger" title="Sign In or Register">
-                        <i class="fas fa-user-circle"></i>
-                        <span>Sign In</span>
+                    <!-- User Account Pill (Logged Out State) -->
+                    <button id="btn-open-auth-landing" class="nav-capsule-btn btn-auth-trigger" title="Sign In or Register">
+                        <i class="fas fa-circle-user"></i>
                     </button>
 
                     <!-- User Profile Badge (Logged In State) -->
-                    <div id="user-badge-landing" class="user-nav-badge hidden">
+                    <div id="user-badge-landing" class="user-nav-badge nav-capsule-badge hidden">
                         <span class="user-avatar-initial" id="user-initial-landing">U</span>
                         <span class="user-nav-username" id="user-name-landing">User</span>
                         <button type="button" class="btn-sign-out" id="btn-sign-out-landing" title="Sign Out">
@@ -64,17 +57,11 @@
                         </button>
                     </div>
 
-                    <!-- Theme Toggle -->
-                    <button class="btn-theme-toggle" id="btn-theme-toggle-landing" title="Toggle Light / Dark Mode">
+                    <!-- Theme Toggle Pill -->
+                    <button class="nav-capsule-btn btn-theme-toggle" id="btn-theme-toggle-landing" title="Toggle Light / Dark Mode">
                         <i class="fas fa-moon theme-icon-dark hidden"></i>
                         <i class="fas fa-sun theme-icon-light"></i>
-                        <span class="theme-text">LIGHT</span>
-                    </button>
-
-                    <!-- Direct Launch Pill in Nav -->
-                    <button class="btn-nav-launch btn-launch-app" title="Open Alarm Map Cockpit">
-                        <i class="fas fa-location-arrow"></i>
-                        <span>Open App</span>
+                        <span class="theme-text hidden">LIGHT</span>
                     </button>
                 </div>
             </div>
@@ -373,10 +360,24 @@
 
         <!-- Main App Container -->
         <main class="app-workspace">
-            <div class="app-layout-grid">
+
+            <!-- Mobile Segmented Navigation Bar (Phone Viewports < 768px) -->
+            <div class="mobile-view-tabs" id="mobile-view-tabs">
+                <button type="button" class="mobile-tab-btn active" id="mobile-tab-map" data-target="map">
+                    <i class="fas fa-map-location-dot"></i>
+                    <span>Live Map</span>
+                </button>
+                <button type="button" class="mobile-tab-btn" id="mobile-tab-setup" data-target="setup">
+                    <i class="fas fa-sliders"></i>
+                    <span>Trip Options</span>
+                    <span class="mobile-tab-badge" id="mobile-tab-setup-badge">Ready</span>
+                </button>
+            </div>
+
+            <div class="app-layout-grid" id="app-layout-grid" data-active-tab="map">
                 
                 <!-- LEFT PANEL: TRANSIT CONTROLLER & SETTINGS -->
-                <div class="trip-controller-card">
+                <div class="trip-controller-card" id="trip-controller-card">
                     <div class="card-header-clean">
                         <div class="card-title"><i class="fas fa-sliders" style="color: var(--accent-primary);"></i> Trip Settings</div>
                         <span class="badge badge-cyan" id="app-device-status-badge">Standby</span>
@@ -469,31 +470,57 @@
                         </div>
 
                         <!-- Step 2: Radius -->
-                        <div class="input-group" style="margin-top: 6px;">
+                        <div class="input-group radius-group-container" style="margin-top: 6px;">
                             <div class="input-label">
-                                <span>Alert Radius</span>
-                                <span id="active-radius-display" style="color: var(--accent-primary); font-weight: 700;">500 m</span>
+                                <span><i class="fas fa-bullseye" style="color: var(--accent-primary); margin-right: 4px;"></i> Alert Perimeter</span>
+                                <span id="active-radius-display" style="color: var(--accent-primary); font-weight: 700; background: var(--accent-primary-pale); padding: 2px 10px; border-radius: var(--radius-full);">500 m</span>
                             </div>
                             <div class="radius-buttons-grid">
-                                <button class="radius-btn" data-radius="100">100m</button>
-                                <button class="radius-btn" data-radius="300">300m</button>
-                                <button class="radius-btn active" data-radius="500">500m</button>
-                                <button class="radius-btn" data-radius="1000">1 km</button>
-                                <button class="radius-btn" data-radius="2000">2 km</button>
-                                <button class="radius-btn" data-radius="5000">5 km</button>
+                                <button type="button" class="radius-btn" data-radius="100">100m</button>
+                                <button type="button" class="radius-btn" data-radius="300">300m</button>
+                                <button type="button" class="radius-btn active" data-radius="500">500m</button>
+                                <button type="button" class="radius-btn" data-radius="1000">1 km</button>
+                                <button type="button" class="radius-btn" data-radius="2000">2 km</button>
+                                <button type="button" class="radius-btn" data-radius="5000">5 km</button>
                             </div>
-                            <input type="range" id="custom-radius-slider" min="50" max="10000" step="50" value="500" class="minimal-slider">
+                            <div class="slider-with-hints">
+                                <input type="range" id="custom-radius-slider" min="50" max="10000" step="50" value="500" class="minimal-slider" aria-label="Custom Alert Radius">
+                                <div class="slider-ticks-row">
+                                    <span>50m (Close)</span>
+                                    <span>500m</span>
+                                    <span>10km (Wide)</span>
+                                </div>
+                            </div>
                             <span id="custom-radius-val" class="hidden">500 m</span>
                         </div>
 
                         <!-- Step 3: Alarm Tone -->
-                        <div class="input-group" style="margin-top: 6px;">
-                            <div class="input-label">Alarm Sound</div>
-                            <div class="sound-pills-row" style="justify-content: flex-start;">
-                                <div class="sound-pill-opt selected" data-sound="loud">Loud Alarm</div>
-                                <div class="sound-pill-opt" data-sound="siren">Digital Siren</div>
-                                <div class="sound-pill-opt" data-sound="chime">Train Chime</div>
-                                <div class="sound-pill-opt" data-sound="radar">Radar Pulse</div>
+                        <div class="input-group sound-group-container" style="margin-top: 6px;">
+                            <div class="input-label">
+                                <span><i class="fas fa-volume-high" style="color: var(--accent-primary); margin-right: 4px;"></i> Alarm Sound</span>
+                                <span style="font-size: 0.72rem; color: var(--text-muted); text-transform: none;">Tap pill to test</span>
+                            </div>
+                            <div class="sound-pills-row">
+                                <div class="sound-pill-opt selected" data-sound="loud">
+                                    <i class="fas fa-bell sound-opt-icon"></i>
+                                    <span class="sound-opt-title">Loud Alarm</span>
+                                    <span class="sound-opt-play"><i class="fas fa-play"></i></span>
+                                </div>
+                                <div class="sound-pill-opt" data-sound="siren">
+                                    <i class="fas fa-triangle-exclamation sound-opt-icon"></i>
+                                    <span class="sound-opt-title">Digital Siren</span>
+                                    <span class="sound-opt-play"><i class="fas fa-play"></i></span>
+                                </div>
+                                <div class="sound-pill-opt" data-sound="chime">
+                                    <i class="fas fa-train-subway sound-opt-icon"></i>
+                                    <span class="sound-opt-title">Train Chime</span>
+                                    <span class="sound-opt-play"><i class="fas fa-play"></i></span>
+                                </div>
+                                <div class="sound-pill-opt" data-sound="radar">
+                                    <i class="fas fa-satellite-dish sound-opt-icon"></i>
+                                    <span class="sound-opt-title">Radar Pulse</span>
+                                    <span class="sound-opt-play"><i class="fas fa-play"></i></span>
+                                </div>
                             </div>
                         </div>
 
@@ -547,21 +574,8 @@
                 </div>
 
                 <!-- RIGHT PANEL: LEAFLET MAP & SIMULATOR BAR (RIGHT REFERENCE SCREEN) -->
-                <div class="map-workspace-card">
-                    <!-- Preset Route Toolbar -->
-                    <div class="cockpit-toolbar" id="cockpit-sim-toolbar">
-                        <div class="preset-dropdown-wrap">
-                            <label style="font-size: 0.8rem; color: var(--text-muted); margin-right: 6px; font-weight: 600;"><i class="fas fa-route" style="color: var(--accent-primary);"></i> Corridor:</label>
-                            <select id="journey-preset-select">
-                                <option value="ran-tat">Pod Karlovem ➔ Bernard Pub (15 km)</option>
-                                <option value="ran-pat">Patna ➔ Ranchi (Vande Bharat - 380 km)</option>
-                                <option value="ran-dhn">Dhanbad ➔ Ranchi Junction (160 km)</option>
-                                <option value="ran-kol">Howrah ➔ Ranchi Junction (420 km)</option>
-                                <option value="blr-chn">Chennai ➔ Bangalore (340 km)</option>
-                            </select>
-                        </div>
-                    </div>
-
+                <div class="map-workspace-card" id="map-workspace-card">
+                    
                     <!-- Leaflet Canvas with Floating Pill & Controls -->
                     <div class="map-wrapper-relative">
                         <div id="interactive-map"></div>
@@ -598,45 +612,95 @@
                                 <i class="fas fa-route"></i>
                             </button>
                         </div>
-                    </div>
 
-                    <!-- Live Auto-Movement & Simulation Bar -->
-                    <div class="auto-move-panel">
-                        <div class="auto-move-header">
-                            <div class="auto-move-title-wrap">
-                                <span class="auto-move-title"><i class="fas fa-bus"></i> Transit Simulation & Testing</span>
-                                <div class="sim-speed-minimal-pills">
-                                    <span style="font-size: 0.72rem; color: var(--text-muted); margin-left: 6px;">Speed:</span>
-                                    <button class="sim-speed-btn" data-speed="1">1x</button>
-                                    <button class="sim-speed-btn" data-speed="5">5x</button>
-                                    <button class="sim-speed-btn active" data-speed="20">20x</button>
-                                    <button class="sim-speed-btn" data-speed="80">80x</button>
+                        <!-- Floating Bottom Quick Action Card (Mobile Viewport Only) -->
+                        <div class="mobile-map-floating-card" id="mobile-map-floating-card">
+                            <div class="mobile-floating-info">
+                                <div class="mobile-floating-dest-wrap">
+                                    <div class="mobile-floating-dest-icon"><i class="fas fa-location-dot"></i></div>
+                                    <div class="mobile-floating-dest-text">
+                                        <span class="mobile-floating-dest-name" id="mobile-float-dest-name">Bernard Pub (Prague)</span>
+                                        <span class="mobile-floating-eta" id="mobile-float-eta">15 km • ~15 min</span>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="auto-move-actions">
-                                <button id="btn-auto-move" class="btn-auto-move-play">
-                                    <i class="fas fa-play"></i> Auto-Move
+                            <div class="mobile-floating-actions">
+                                <button type="button" class="mobile-btn-quick-options" id="btn-mobile-open-settings" title="Adjust Settings">
+                                    <i class="fas fa-sliders"></i>
+                                    <span>Options</span>
                                 </button>
-                                <button id="btn-step-forward" class="btn-step-action" title="Move 500m closer">
-                                    +500m
-                                </button>
-                                <button id="btn-jump-inside-radius" class="btn-jump-radius-action" title="Jump inside alert radius">
-                                    <i class="fas fa-bullseye"></i> Inside Radius
+                                <button type="button" class="mobile-btn-quick-start" id="btn-mobile-start-trip">
+                                    <i class="fas fa-bell"></i>
+                                    <span id="mobile-float-btn-label">Start Alarm</span>
                                 </button>
                             </div>
                         </div>
-                        <div class="auto-move-slider-wrap">
-                            <input type="range" id="auto-move-slider" min="0" max="100" step="1" value="0">
-                        </div>
                     </div>
 
-                    <!-- Telemetry & Diagnostics Bar -->
-                    <div class="telemetry-bar-clean">
-                        <div class="tele-item">Dist: <strong id="dbg-dist">-- m</strong></div>
-                        <div class="tele-item">Accuracy: <strong id="dbg-accuracy">±12m</strong></div>
-                        <div class="tele-item">Speed: <span id="live-motion-badge" class="tele-motion-badge"><strong id="live-stat-speed">0 km/h</strong> (Stationary)</span></div>
-                        <div class="tele-item">Lat/Lon: <strong id="dbg-lat">23.3518</strong>, <strong id="dbg-lon">85.3378</strong></div>
-                        <div class="tele-item">Status: <strong id="dbg-status-note" style="color: var(--transit-green);">Nominal</strong></div>
+                    <!-- Collapsible Simulation & Diagnostics Accordion (Cleans up mobile clutter) -->
+                    <div class="mobile-sim-accordion">
+                        <button type="button" class="mobile-sim-accordion-toggle" id="btn-toggle-mobile-sim">
+                            <span class="accordion-title"><i class="fas fa-flask"></i> Transit Simulator & Tools</span>
+                            <span class="accordion-right">
+                                <span class="accordion-sub-tag">Testing</span>
+                                <i class="fas fa-chevron-down accordion-chevron" id="mobile-sim-chevron"></i>
+                            </span>
+                        </button>
+                        <div class="mobile-sim-accordion-body" id="mobile-sim-drawer">
+                            
+                            <!-- Preset Route Toolbar -->
+                            <div class="cockpit-toolbar" id="cockpit-sim-toolbar">
+                                <div class="preset-dropdown-wrap">
+                                    <label style="font-size: 0.8rem; color: var(--text-muted); margin-right: 6px; font-weight: 600;"><i class="fas fa-route" style="color: var(--accent-primary);"></i> Corridor:</label>
+                                    <select id="journey-preset-select">
+                                        <option value="ran-tat">Pod Karlovem ➔ Bernard Pub (15 km)</option>
+                                        <option value="ran-pat">Patna ➔ Ranchi (Vande Bharat - 380 km)</option>
+                                        <option value="ran-dhn">Dhanbad ➔ Ranchi Junction (160 km)</option>
+                                        <option value="ran-kol">Howrah ➔ Ranchi Junction (420 km)</option>
+                                        <option value="blr-chn">Chennai ➔ Bangalore (340 km)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Live Auto-Movement & Simulation Bar -->
+                            <div class="auto-move-panel">
+                                <div class="auto-move-header">
+                                    <div class="auto-move-title-wrap">
+                                        <span class="auto-move-title"><i class="fas fa-bus"></i> Transit Simulation</span>
+                                        <div class="sim-speed-minimal-pills">
+                                            <span style="font-size: 0.72rem; color: var(--text-muted); margin-left: 6px;">Speed:</span>
+                                            <button type="button" class="sim-speed-btn" data-speed="1">1x</button>
+                                            <button type="button" class="sim-speed-btn" data-speed="5">5x</button>
+                                            <button type="button" class="sim-speed-btn active" data-speed="20">20x</button>
+                                            <button type="button" class="sim-speed-btn" data-speed="80">80x</button>
+                                        </div>
+                                    </div>
+                                    <div class="auto-move-actions">
+                                        <button type="button" id="btn-auto-move" class="btn-auto-move-play">
+                                            <i class="fas fa-play"></i> Auto-Move
+                                        </button>
+                                        <button type="button" id="btn-step-forward" class="btn-step-action" title="Move 500m closer">
+                                            +500m
+                                        </button>
+                                        <button type="button" id="btn-jump-inside-radius" class="btn-jump-radius-action" title="Jump inside alert radius">
+                                            <i class="fas fa-bullseye"></i> Inside
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="auto-move-slider-wrap">
+                                    <input type="range" id="auto-move-slider" min="0" max="100" step="1" value="0" aria-label="Simulation Progress">
+                                </div>
+                            </div>
+
+                            <!-- Telemetry & Diagnostics Bar -->
+                            <div class="telemetry-bar-clean">
+                                <div class="tele-item">Dist: <strong id="dbg-dist">-- m</strong></div>
+                                <div class="tele-item">Accuracy: <strong id="dbg-accuracy">±12m</strong></div>
+                                <div class="tele-item">Speed: <span id="live-motion-badge" class="tele-motion-badge"><strong id="live-stat-speed">0 km/h</strong> (Stationary)</span></div>
+                                <div class="tele-item">Lat/Lon: <strong id="dbg-lat">23.3518</strong>, <strong id="dbg-lon">85.3378</strong></div>
+                                <div class="tele-item">Status: <strong id="dbg-status-note" style="color: var(--transit-green);">Nominal</strong></div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Hidden developer hooks for system compatibility -->
