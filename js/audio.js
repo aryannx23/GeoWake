@@ -12,6 +12,7 @@ class SoundEngine {
         this.activeIntervals = [];
         this.isUnlocked = false;
         this.keepaliveInterval = null;
+        this.silentAudio = null;
     }
 
     init() {
@@ -44,6 +45,83 @@ class SoundEngine {
         }
     }
 
+    /**
+     * Mobile Background Audio & MediaSession Keepalive
+     * Plays a continuous silent loop to keep mobile OS from killing GPS watchPosition & JS execution
+     */
+    startBackgroundAudio(tripData) {
+        this.unlockAudio();
+
+        if (!this.silentAudio) {
+            try {
+                // Standard 1-second silent WAV base64 loop
+                this.silentAudio = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA');
+                this.silentAudio.loop = true;
+                this.silentAudio.volume = 0.01;
+            } catch (e) {
+                console.warn('Could not initialize silent audio element', e);
+            }
+        }
+
+        if (this.silentAudio) {
+            this.silentAudio.play().catch(() => {
+                // Autoplay policy fallback: audio context will resume on user touch
+            });
+        }
+
+        this.updateMediaSession(tripData);
+        this.startAudioKeepalive();
+    }
+
+    updateMediaSession(tripData) {
+        if (!('mediaSession' in navigator)) return;
+
+        const destName = tripData?.destName || tripData?.destinationName || 'Destination';
+        const distStr = tripData?.distanceText || (tripData?.distanceMeters ? `${tripData.distanceMeters}m` : 'Active Transit');
+        const speedStr = tripData?.speedText || (tripData?.speedKmh ? `${tripData.speedKmh} km/h` : 'In Transit');
+
+        try {
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: `GeoWake: ${distStr} to ${destName}`,
+                artist: `Speed: ${speedStr} • Background GPS Active`,
+                album: 'GeoWake Location Alarm',
+                artwork: [
+                    { src: 'assets/live-location-arrow.png', sizes: '192x192', type: 'image/png' },
+                    { src: 'assets/live-location-arrow.png', sizes: '512x512', type: 'image/png' }
+                ]
+            });
+
+            navigator.mediaSession.playbackState = 'playing';
+
+            navigator.mediaSession.setActionHandler('stop', () => {
+                if (window.app) window.app.stopTrip();
+            });
+            navigator.mediaSession.setActionHandler('pause', () => {
+                if (window.app) window.app.stopTrip();
+            });
+            navigator.mediaSession.setActionHandler('play', () => {
+                if (this.silentAudio) this.silentAudio.play().catch(() => {});
+            });
+        } catch (e) {}
+    }
+
+    stopBackgroundAudio() {
+        this.stopAudioKeepalive();
+
+        if (this.silentAudio) {
+            try {
+                this.silentAudio.pause();
+                this.silentAudio.currentTime = 0;
+            } catch (e) {}
+        }
+
+        if ('mediaSession' in navigator) {
+            try {
+                navigator.mediaSession.playbackState = 'none';
+            } catch (e) {}
+        }
+    }
+
     startAudioKeepalive() {
         this.stopAudioKeepalive();
         this.keepaliveInterval = setInterval(() => {
@@ -58,7 +136,7 @@ class SoundEngine {
                     osc.stop(this.ctx.currentTime + 0.1);
                 } catch (e) {}
             }
-        }, 25000);
+        }, 15000);
     }
 
     stopAudioKeepalive() {
@@ -74,6 +152,7 @@ class SoundEngine {
 
     stopAlarm() {
         this.stopAll();
+        this.stopBackgroundAudio();
     }
 
     stopAll() {

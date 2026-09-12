@@ -55,6 +55,9 @@ class GeoWakeApp {
 
         this.logEntries = [];
         this.wakeLockSentinel = null;
+        this.lastCalculatedDistance = null;
+        this.lastCalculatedSpeed = 0;
+        this._toastTimer = null;
     }
 
     async requestWakeLock() {
@@ -80,16 +83,184 @@ class GeoWakeApp {
         }
     }
 
+    initServiceWorker() {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then((reg) => {
+                    console.log('[SW] Service Worker registered:', reg.scope);
+                })
+                .catch((err) => {
+                    console.warn('[SW] Service Worker registration:', err);
+                });
+
+            navigator.serviceWorker.addEventListener('message', (event) => {
+                if (event.data && event.data.type === 'STOP_TRIP_ACTION') {
+                    this.stopTrip('Stopped via Notification Action');
+                }
+            });
+        }
+    }
+
+    async requestNotificationPermission() {
+        if ('Notification' in window) {
+            if (Notification.permission === 'default') {
+                try {
+                    const perm = await Notification.requestPermission();
+                    if (perm === 'granted') {
+                        this.log('🔔 Notifications enabled: Live trip updates will show in the background.');
+                        this.showToast('🔔 Background live notifications enabled!', 'success');
+                    }
+                } catch (e) {}
+            }
+        }
+    }
+
+    setupBackNavInterception() {
+        // Prevent accidental hardware / browser back navigation while a trip is active
+        window.addEventListener('popstate', () => {
+            if (this.state === 'ACTIVE' || this.state === 'TRIGGERED') {
+                window.history.pushState({ geowakeTrip: true }, '');
+                this.showToast('📍 GeoWake is actively tracking in the background. Stop alarm from cockpit to exit.', 'warning');
+            }
+        });
+
+        // Warn before tab closure or refresh during active trip
+        window.addEventListener('beforeunload', (e) => {
+            if (this.state === 'ACTIVE' || this.state === 'TRIGGERED') {
+                e.preventDefault();
+                e.returnValue = 'A location alarm is currently active. Leaving will terminate tracking.';
+                return e.returnValue;
+            }
+        });
+    }
+
+    updateBackgroundNotification(sample = null, distanceMeters = null) {
+        if (this.state !== 'ACTIVE') return;
+
+        const destName = this.currentTrip.destinationName || 'Destination';
+        let distText = 'In Transit';
+        if (distanceMeters !== null && distanceMeters !== undefined) {
+            distText = window.telemetryEngine ? window.telemetryEngine.formatDistance(distanceMeters) : `${distanceMeters}m`;
+        } else if (this.lastCalculatedDistance) {
+            distText = window.telemetryEngine ? window.telemetryEngine.formatDistance(this.lastCalculatedDistance) : `${this.lastCalculatedDistance}m`;
+        }
+
+        const speed = sample ? sample.speedKmh : (this.lastCalculatedSpeed || 0);
+        const speedText = `${speed} km/h`;
+        const etaText = (window.telemetryEngine && (distanceMeters || this.lastCalculatedDistance))
+            ? window.telemetryEngine.formatEta(distanceMeters || this.lastCalculatedDistance, speed)
+            : '--';
+
+        const isApproaching = distanceMeters ? (distanceMeters <= this.currentTrip.alertRadius * 1.5) : false;
+
+        const payload = {
+            destName: destName,
+            distanceText: distText,
+            speedText: speedText,
+            etaText: etaText,
+            statusText: isApproaching 
+                ? `🚨 Reaching wake radius (${this.currentTrip.alertRadius}m)!` 
+                : `Active in background • Wake radius: ${this.currentTrip.alertRadius}m`,
+            isApproaching: isApproaching
+        };
+
+        // Post persistent notification to Service Worker
+        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+            navigator.serviceWorker.controller.postMessage({
+                type: 'SHOW_TRIP_NOTIFICATION',
+                payload: payload
+            });
+        } else if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.ready.then((reg) => {
+                if (reg.active) {
+                    reg.active.postMessage({
+                        type: 'SHOW_TRIP_NOTIFICATION',
+                        payload: payload
+                    });
+                }
+            }).catch(() => {});
+        }
+
+        // Update MediaSession lockscreen widget
+        if (window.soundEngine) {
+            window.soundEngine.updateMediaSession({
+                destName: destName,
+                distanceText: distText,
+                speedText: speedText
+            });
+        }
+    }
+
+    triggerAlarmNotification() {
+        const payload = {
+            destName: this.currentTrip.destinationName || 'Destination',
+            radiusMeters: this.currentTrip.alertRadius || 500
+        };
+
+        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+            navigator.serviceWorker.controller.postMessage({
+                type: 'TRIGGER_ALARM_NOTIFICATION',
+                payload: payload
+            });
+        } else if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.ready.then((reg) => {
+                if (reg.active) {
+                    reg.active.postMessage({
+                        type: 'TRIGGER_ALARM_NOTIFICATION',
+                        payload: payload
+                    });
+                }
+            }).catch(() => {});
+        }
+    }
+
+    clearBackgroundNotification() {
+        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+            navigator.serviceWorker.controller.postMessage({
+                type: 'CLEAR_TRIP_NOTIFICATION'
+            });
+        } else if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.ready.then((reg) => {
+                if (reg.active) {
+                    reg.active.postMessage({
+                        type: 'CLEAR_TRIP_NOTIFICATION'
+                    });
+                }
+            }).catch(() => {});
+        }
+    }
+
+    showToast(message, type = 'info') {
+        let toast = document.getElementById('geowake-app-toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'geowake-app-toast';
+            toast.className = 'geowake-toast-pill';
+            document.body.appendChild(toast);
+        }
+        const iconClass = type === 'warning' ? 'fas fa-shield-halved' : (type === 'success' ? 'fas fa-circle-check' : 'fas fa-bell');
+        toast.innerHTML = `<i class="${iconClass}"></i> <span>${message}</span>`;
+        toast.classList.add('visible');
+        if (this._toastTimer) clearTimeout(this._toastTimer);
+        this._toastTimer = setTimeout(() => {
+            toast.classList.remove('visible');
+        }, 4000);
+    }
+
     init() {
         this.loadStorage();
         this.bindEvents();
         this.renderSavedPlaces();
         this.renderTripHistory();
+        this.initServiceWorker();
+        this.setupBackNavInterception();
 
-        // Re-acquire Screen Wake Lock when returning to tab during active trip
+        // Background execution & Wake Lock recovery
         document.addEventListener('visibilitychange', async () => {
             if (document.visibilityState === 'visible' && this.state === 'ACTIVE') {
                 await this.requestWakeLock();
+            } else if (document.visibilityState === 'hidden' && this.state === 'ACTIVE') {
+                this.updateBackgroundNotification();
             }
         });
 
@@ -1593,12 +1764,20 @@ class GeoWakeApp {
         this.currentTrip.startedAt = new Date().toLocaleTimeString();
         window.telemetryEngine.reset();
 
-        // Keep phone screen awake & ensure audio context is active during transit
+        // 1. Keep phone screen awake & ensure background audio keepalive runs
         this.requestWakeLock();
+        this.requestNotificationPermission();
+
+        // 2. Intercept browser back button
+        window.history.pushState({ geowakeTrip: true }, '');
+
+        // 3. Start silent looping audio & MediaSession to prevent mobile OS background suspension
         if (window.soundEngine) {
-            window.soundEngine.unlockAudio();
-            window.soundEngine.startAudioKeepalive();
+            window.soundEngine.startBackgroundAudio(this.currentTrip);
         }
+
+        // 4. Dispatch initial persistent live trip notification
+        this.updateBackgroundNotification();
 
         // Switch to Active Trip View
         document.getElementById('setup-card-panel').classList.add('hidden');
@@ -1621,6 +1800,7 @@ class GeoWakeApp {
             window.tripSimulator.pause();
             window.liveTracker.startTracking();
             this.log(`🟢 Live GPS Active for "${this.currentTrip.destinationName}". Moves ONLY when your device physically moves.`);
+            this.showToast(`🛰️ Live GPS Active. Monitoring in background.`, 'success');
         } else {
             if (activeModeBadge) {
                 activeModeBadge.innerHTML = '<i class="fas fa-train"></i> ROUTE SIMULATION ACTIVE';
@@ -1628,17 +1808,20 @@ class GeoWakeApp {
             window.liveTracker.stopTracking();
             window.tripSimulator.start();
             this.log(`🟢 Journey Simulation Started for "${this.currentTrip.destinationName}".`);
+            this.showToast(`🚆 Trip Started. Monitoring in background.`, 'success');
         }
     }
 
     stopTrip(reason = 'Trip Stopped') {
         this.state = 'COMPLETED';
         this.releaseWakeLock();
+        this.clearBackgroundNotification();
+
         if (window.liveTracker) window.liveTracker.stopTracking();
         if (window.tripSimulator) window.tripSimulator.pause();
         if (window.soundEngine) {
             window.soundEngine.stopAll();
-            window.soundEngine.stopAudioKeepalive();
+            window.soundEngine.stopBackgroundAudio();
         }
 
         document.getElementById('setup-card-panel').classList.remove('hidden');
@@ -1656,6 +1839,7 @@ class GeoWakeApp {
             this.recordHistory(this.currentTrip.destinationName, `${this.currentTrip.alertRadius} m`, 'Completed');
         }
         this.log(`🛑 ${reason}. Service stopped.`);
+        this.showToast(`🛑 ${reason}.`, 'info');
     }
 
     handleLocationSample(sample) {
@@ -1720,6 +1904,13 @@ class GeoWakeApp {
         const slider = document.getElementById('auto-move-slider');
         if (slider && sample.progress !== undefined) {
             slider.value = Math.round(sample.progress * 100);
+        }
+
+        // Live notification update for background execution
+        this.lastCalculatedDistance = result.distance;
+        this.lastCalculatedSpeed = sample.speedKmh;
+        if (this.state === 'ACTIVE') {
+            this.updateBackgroundNotification(sample, result.distance);
         }
 
         // Check for Alarm Trigger condition
@@ -1792,6 +1983,9 @@ class GeoWakeApp {
         this.state = 'TRIGGERED';
         if (window.liveTracker) window.liveTracker.stopTracking();
         if (window.tripSimulator) window.tripSimulator.pause();
+
+        // High priority alarm notification
+        this.triggerAlarmNotification();
 
         // Update Alarm Overlay UI
         const overlay = document.getElementById('fullscreen-alarm-overlay');

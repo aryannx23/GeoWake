@@ -5416,3 +5416,41 @@ button {
     }
 }
 
+/* Glassmorphic App Notification Toast */
+.geowake-toast-pill {
+    position: fixed;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100px);
+    background: rgba(15, 23, 42, 0.92);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    color: #F8FAFC;
+    border: 1px solid rgba(255, 107, 53, 0.4);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+    padding: 10px 20px;
+    border-radius: 9999px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 999999;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    max-width: 90vw;
+    text-align: center;
+}
+
+.geowake-toast-pill.visible {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.geowake-toast-pill i {
+    color: var(--accent-primary, #FF6B35);
+    font-size: 1rem;
+}
+
