@@ -22,7 +22,7 @@
     <script src="js/theme.js"></script>
 
     <!-- Custom CSS (Transit Theme) -->
-    <link rel="stylesheet" href="style.css?v=2.4">
+    <link rel="stylesheet" href="style.css?v=2.5">
 </head>
 <body>
 
@@ -43,13 +43,8 @@
                 </div>
 
                 <div class="transit-nav-actions">
-                    <!-- Cloud Sync Status Badge -->
-                    <span class="cloud-db-status-badge badge-cyan" id="cloud-badge-landing" title="Cloud Database Sync Status">
-                        <i class="fas fa-cloud"></i> <span>Cloud DB</span>
-                    </span>
-
                     <!-- User Account Pill (Logged Out State) -->
-                    <button id="btn-open-auth-landing" class="nav-capsule-btn btn-auth-trigger" title="Sign In or Register">
+                    <button id="btn-open-auth-landing" class="nav-action-btn btn-auth-trigger" title="Sign In or Register" aria-label="Sign In or Register">
                         <i class="fas fa-circle-user"></i>
                     </button>
 
@@ -57,13 +52,13 @@
                     <div id="user-badge-landing" class="user-nav-badge nav-capsule-badge hidden">
                         <span class="user-avatar-initial" id="user-initial-landing">U</span>
                         <span class="user-nav-username" id="user-name-landing">User</span>
-                        <button type="button" class="btn-sign-out" id="btn-sign-out-landing" title="Sign Out">
+                        <button type="button" class="btn-sign-out" id="btn-sign-out-landing" title="Sign Out" aria-label="Sign Out">
                             <i class="fas fa-arrow-right-from-bracket"></i>
                         </button>
                     </div>
 
                     <!-- Theme Toggle Pill -->
-                    <button class="nav-capsule-btn btn-theme-toggle" id="btn-theme-toggle-landing" title="Toggle Light / Dark Mode">
+                    <button class="nav-action-btn btn-theme-toggle" id="btn-theme-toggle-landing" title="Toggle Light / Dark Mode" aria-label="Toggle Theme">
                         <i class="fas fa-moon theme-icon-dark hidden"></i>
                         <i class="fas fa-sun theme-icon-light"></i>
                         <span class="theme-text hidden">LIGHT</span>
@@ -331,40 +326,30 @@
             </div>
 
             <div class="app-transit-nav-right">
-                <!-- Cloud Sync Status Badge -->
-                <span class="cloud-db-status-badge badge-cyan" id="cloud-badge-app" title="Cloud Database Sync Status">
-                    <i class="fas fa-cloud"></i> <span>Cloud DB</span>
-                </span>
-
-                <button id="btn-toggle-history" class="icon-round-btn" title="View History">
+                <button id="btn-toggle-history" class="header-action-btn" title="View History" aria-label="Trip History">
                     <i class="fas fa-clock-rotate-left"></i>
                 </button>
 
                 <!-- User Account / Sign In Pill (Logged Out State) -->
-                <button id="btn-open-auth-app" class="btn-auth-nav btn-auth-trigger" title="Sign In or Register">
-                    <i class="fas fa-user-circle"></i>
-                    <span>Sign In</span>
+                <button id="btn-open-auth-app" class="header-action-btn btn-auth-trigger" title="Sign In or Register" aria-label="Sign In or Register">
+                    <i class="fas fa-circle-user"></i>
                 </button>
 
                 <!-- User Profile Badge (Logged In State) -->
                 <div id="user-badge-app" class="user-nav-badge hidden">
                     <span class="user-avatar-initial" id="user-initial-app">U</span>
                     <span class="user-nav-username" id="user-name-app">User</span>
-                    <button type="button" class="btn-sign-out" id="btn-sign-out-app" title="Sign Out">
+                    <button type="button" class="btn-sign-out" id="btn-sign-out-app" title="Sign Out" aria-label="Sign Out">
                         <i class="fas fa-arrow-right-from-bracket"></i>
                     </button>
                 </div>
 
                 <!-- Theme Switcher -->
-                <button class="btn-theme-toggle" id="btn-theme-toggle-app" title="Toggle Theme">
+                <button class="header-action-btn btn-theme-toggle" id="btn-theme-toggle-app" title="Toggle Theme" aria-label="Toggle Theme">
                     <i class="fas fa-moon theme-icon-dark hidden"></i>
                     <i class="fas fa-sun theme-icon-light"></i>
-                    <span class="theme-text">LIGHT</span>
+                    <span class="theme-text hidden">LIGHT</span>
                 </button>
-
-                <span class="badge badge-cyan" id="app-status-badge">
-                    <i class="fas fa-location-crosshairs"></i> GPS Ready
-                </span>
             </div>
         </header>
 
@@ -878,14 +863,14 @@
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
-    <!-- Scripts (v2.4 Mobile Web Browser & Wake Lock Optimization) -->
-    <script src="js/audio.js?v=2.4"></script>
-    <script src="js/cloud-db.js?v=2.4"></script>
-    <script src="js/auth.js?v=2.4"></script>
-    <script src="js/telemetry.js?v=2.4"></script>
-    <script src="js/geolocation.js?v=2.4"></script>
-    <script src="js/map.js?v=2.4"></script>
-    <script src="js/simulator.js?v=2.4"></script>
-    <script src="js/app.js?v=2.4"></script>
+    <!-- Scripts (v2.5 Refined Top Navigation & Mobile Header) -->
+    <script src="js/audio.js?v=2.5"></script>
+    <script src="js/cloud-db.js?v=2.5"></script>
+    <script src="js/auth.js?v=2.5"></script>
+    <script src="js/telemetry.js?v=2.5"></script>
+    <script src="js/geolocation.js?v=2.5"></script>
+    <script src="js/map.js?v=2.5"></script>
+    <script src="js/simulator.js?v=2.5"></script>
+    <script src="js/app.js?v=2.5"></script>
 </body>
 </html>

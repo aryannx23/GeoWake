@@ -388,117 +388,147 @@ button {
     flex-shrink: 0;
 }
 
-/* ── CAPSULE NAVBAR BUTTONS (HOME / LANDING SCREEN) ──────────────── */
+/* ── TOP NAVBAR ACTION BUTTONS (LANDING & APP HEADER) ─────────────── */
 .transit-nav-actions {
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
+.nav-action-btn,
 .nav-capsule-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 50px;
-    height: 36px;
-    border-radius: 9999px;
-    background: rgba(255, 255, 255, 0.14);
-    border: 1.5px solid rgba(255, 255, 255, 0.38);
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.16);
+    border: 1.5px solid rgba(255, 255, 255, 0.40);
     color: #FFFFFF;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     padding: 0;
     flex-shrink: 0;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 
+[data-theme="dark"] .nav-action-btn,
 [data-theme="dark"] .nav-capsule-btn {
     background: rgba(255, 255, 255, 0.08);
     border: 1.5px solid rgba(255, 255, 255, 0.22);
 }
 
+.nav-action-btn:hover,
 .nav-capsule-btn:hover {
-    background: rgba(255, 255, 255, 0.26);
-    border-color: rgba(255, 255, 255, 0.65);
+    background: rgba(255, 255, 255, 0.28);
+    border-color: rgba(255, 255, 255, 0.70);
     transform: translateY(-1px);
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.20);
 }
 
+.nav-action-btn:active,
+.nav-capsule-btn:active {
+    transform: scale(0.92);
+}
+
+.nav-action-btn i,
 .nav-capsule-btn i {
-    font-size: 1rem;
+    font-size: 1.05rem;
     color: #FFFFFF;
-    transition: color 0.2s ease, transform 0.2s ease;
+    transition: transform 0.25s ease;
 }
 
-/* Specific styling for the sun theme icon in reference (soft sky blue) */
-.nav-capsule-btn.btn-theme-toggle .theme-icon-light {
-    color: #60A5FA !important;
+.btn-theme-toggle .theme-icon-light {
+    color: #F59E0B !important; /* Vibrant golden sun */
     font-size: 1.05rem;
 }
 
-.nav-capsule-btn.btn-theme-toggle .theme-icon-dark {
-    color: #93C5FD !important;
+.btn-theme-toggle .theme-icon-dark {
+    color: #60A5FA !important; /* Sky blue crescent */
     font-size: 1.05rem;
 }
 
-.nav-capsule-btn:hover i {
-    transform: scale(1.08);
+.btn-theme-toggle:hover i {
+    transform: rotate(20deg) scale(1.10);
 }
 
 /* User Profile Badge (Logged In State Capsule) */
-.user-nav-badge.nav-capsule-badge {
+.user-nav-badge {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    height: 36px;
-    padding: 0 10px 0 6px;
+    gap: 7px;
+    height: 38px;
+    padding: 0 10px 0 5px;
     border-radius: 9999px;
-    background: rgba(255, 255, 255, 0.14);
-    border: 1.5px solid rgba(255, 255, 255, 0.38);
+    background: rgba(255, 255, 255, 0.16);
+    border: 1.5px solid rgba(255, 255, 255, 0.40);
     color: #FFFFFF;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 
-[data-theme="dark"] .user-nav-badge.nav-capsule-badge {
+[data-theme="dark"] .user-nav-badge {
     background: rgba(255, 255, 255, 0.08);
     border-color: rgba(255, 255, 255, 0.22);
 }
 
-.user-nav-badge.nav-capsule-badge .user-avatar-initial {
-    width: 24px;
-    height: 24px;
+.user-nav-badge .user-avatar-initial {
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     background: #FFFFFF;
     color: var(--accent-primary);
-    font-size: 0.75rem;
+    font-size: 0.82rem;
     font-weight: 800;
+    font-family: var(--font-heading);
     display: flex;
     align-items: center;
     justify-content: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+    flex-shrink: 0;
 }
 
-.user-nav-badge.nav-capsule-badge .user-nav-username {
-    font-size: 0.82rem;
+[data-theme="dark"] .user-nav-badge .user-avatar-initial {
+    background: var(--gradient-primary);
+    color: #FFFFFF;
+}
+
+.user-nav-badge .user-nav-username {
+    font-size: 0.84rem;
     font-weight: 700;
     color: #FFFFFF;
+    white-space: nowrap;
 }
 
-.user-nav-badge.nav-capsule-badge .btn-sign-out {
-    background: transparent;
+.user-nav-badge .btn-sign-out {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.15);
     border: none;
-    color: rgba(255, 255, 255, 0.8);
+    color: rgba(255, 255, 255, 0.85);
     cursor: pointer;
-    padding: 2px;
-    font-size: 0.8rem;
     display: flex;
     align-items: center;
-    transition: color 0.15s ease;
+    justify-content: center;
+    font-size: 0.75rem;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
 }
 
-.user-nav-badge.nav-capsule-badge .btn-sign-out:hover {
+.user-nav-badge .btn-sign-out:hover {
+    background: var(--accent-danger);
     color: #FFFFFF;
+    transform: scale(1.08);
 }
 
 /* The White "Open App" Button matching screenshot */
@@ -1997,93 +2027,139 @@ button {
     gap: 8px;
 }
 
-/* ── HIGH-CONTRAST APP HEADER BUTTONS (LIGHT & DARK THEMES) ───────── */
-.app-transit-header .icon-round-btn {
+/* ── HIGH-CONTRAST APP HEADER BUTTONS (COCKPIT VIEW) ──────────────── */
+.btn-transit-back {
     width: 38px;
     height: 38px;
-    background: var(--bg-main);
+    border-radius: 50%;
+    background: var(--bg-card);
     border: 1.5px solid var(--border-medium);
     color: var(--text-primary);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
-}
-
-.app-transit-header .icon-round-btn i {
-    color: var(--text-primary);
-}
-
-.app-transit-header .icon-round-btn:hover {
-    background: var(--accent-primary-pale);
-    color: var(--accent-primary);
-    border-color: var(--accent-primary);
-    transform: translateY(-1px);
-}
-
-.app-transit-header .icon-round-btn:hover i {
-    color: var(--accent-primary);
-}
-
-.app-transit-header .btn-auth-nav {
-    background: var(--bg-main);
-    border: 1.5px solid var(--border-medium);
-    color: var(--text-primary);
-    font-weight: 700;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
-}
-
-.app-transit-header .btn-auth-nav:hover {
-    background: var(--accent-primary-pale);
-    color: var(--accent-primary);
-    border-color: var(--accent-primary);
-    transform: translateY(-1px);
-}
-
-.app-transit-header .btn-profile-dropdown {
-    background: var(--bg-main);
-    border: 1.5px solid var(--border-medium);
-    color: var(--text-primary);
-    font-weight: 700;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
-}
-
-.app-transit-header .btn-profile-dropdown i {
-    color: var(--text-secondary);
-}
-
-.app-transit-header .btn-profile-dropdown:hover {
-    background: var(--accent-primary-pale);
-    color: var(--accent-primary);
-    border-color: var(--accent-primary);
-}
-
-.app-transit-header .btn-profile-dropdown:hover i {
-    color: var(--accent-primary);
-}
-
-.app-transit-header .btn-theme-toggle {
-    background: var(--bg-main);
-    border: 1.5px solid var(--border-medium);
-    color: var(--text-primary);
-    font-weight: 800;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
-}
-
-.app-transit-header .btn-theme-toggle i {
-    color: var(--accent-amber);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-size: 0.95rem;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 
-[data-theme="dark"] .app-transit-header .btn-theme-toggle i {
-    color: #4FA8ED;
+.btn-transit-back:hover {
+    background: var(--accent-primary-pale);
+    color: var(--accent-primary);
+    border-color: var(--accent-primary);
+    transform: scale(1.05);
 }
 
+.btn-transit-back:active {
+    transform: scale(0.92);
+}
+
+.app-transit-header .header-action-btn,
+.app-transit-header .icon-round-btn,
+.app-transit-header .btn-auth-nav,
+.app-transit-header .btn-theme-toggle {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--bg-card);
+    border: 1.5px solid var(--border-medium);
+    color: var(--text-primary);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.app-transit-header .header-action-btn:hover,
+.app-transit-header .icon-round-btn:hover,
 .app-transit-header .btn-theme-toggle:hover {
     background: var(--accent-primary-pale);
     color: var(--accent-primary);
     border-color: var(--accent-primary);
+    transform: translateY(-1px);
 }
 
-.app-transit-header .btn-theme-toggle:hover i {
+.app-transit-header .header-action-btn:active,
+.app-transit-header .btn-theme-toggle:active {
+    transform: scale(0.92);
+}
+
+.app-transit-header .header-action-btn i {
+    font-size: 1.05rem;
+    color: var(--text-primary);
+    transition: color 0.2s ease;
+}
+
+.app-transit-header .header-action-btn:hover i {
     color: var(--accent-primary);
+}
+
+.app-transit-header .user-nav-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 38px;
+    padding: 0 10px 0 5px;
+    border-radius: 9999px;
+    background: var(--bg-card);
+    border: 1.5px solid var(--border-medium);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.app-transit-header .user-nav-badge .user-avatar-initial {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--gradient-primary);
+    color: #FFFFFF;
+    font-weight: 800;
+    font-size: 0.82rem;
+    font-family: var(--font-heading);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.app-transit-header .user-nav-badge .user-nav-username {
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    white-space: nowrap;
+}
+
+.app-transit-header .user-nav-badge .btn-sign-out {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--bg-main);
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.app-transit-header .user-nav-badge .btn-sign-out:hover {
+    background: var(--accent-danger);
+    color: #FFFFFF;
+    transform: scale(1.08);
 }
 
 /* App Workspace Grid */
@@ -4284,53 +4360,46 @@ button {
         align-items: center;
         gap: 8px;
         min-width: 0;
-        flex-shrink: 1;
+        flex: 1;
     }
 
     .track-bus-title {
-        font-size: 1.02rem;
-        max-width: 140px;
+        font-size: 1.05rem;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        margin: 0;
     }
 
     .btn-transit-back {
-        width: 36px;
-        height: 36px;
-        font-size: 0.90rem;
+        width: 38px;
+        height: 38px;
+        font-size: 0.95rem;
         flex-shrink: 0;
     }
 
     .app-transit-nav-right {
         display: flex;
         align-items: center;
-        gap: 6px;
+        gap: 8px;
         flex-shrink: 0;
     }
 
+    .app-transit-header .header-action-btn,
     .app-transit-header .icon-round-btn,
     .app-transit-header .btn-theme-toggle {
-        width: 36px;
-        height: 36px;
+        width: 38px;
+        height: 38px;
         padding: 0;
-        display: flex;
+        display: inline-flex;
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
+        border-radius: 50%;
     }
 
-    .app-transit-header .theme-text {
-        display: none !important;
-    }
-
-    .app-transit-header .btn-auth-nav {
-        padding: 6px 10px;
-        font-size: 0.80rem;
-        min-height: 36px;
-    }
-
-    .app-transit-header .btn-auth-nav span {
+    .app-transit-header .theme-text,
+    .app-transit-header .auth-btn-label {
         display: none !important;
     }
 
@@ -4338,13 +4407,25 @@ button {
         display: none !important;
     }
 
-    .app-transit-header .user-nav-username {
-        display: none !important;
+    .user-nav-badge {
+        height: 38px;
+        padding: 0 8px 0 5px;
+        gap: 6px;
+        border-radius: 9999px;
     }
 
-    .user-nav-badge {
-        padding: 3px 6px 3px 4px;
-        gap: 5px;
+    .user-nav-badge .user-avatar-initial {
+        width: 28px;
+        height: 28px;
+    }
+
+    .user-nav-badge .btn-sign-out {
+        width: 26px;
+        height: 26px;
+    }
+
+    .transit-nav-bar .user-nav-username {
+        display: none !important;
     }
 
     /* 2. Landing Page Hero & Navigation */
@@ -4985,21 +5066,24 @@ button {
 
 /* ── NARROW PHONES (< 480px) ───────────────────────────────────────── */
 @media (max-width: 480px) {
-    .cloud-db-status-badge span {
-        display: none !important;
-    }
-
-    .cloud-db-status-badge {
-        padding: 6px 8px;
-    }
-
     .brand-text-title {
-        font-size: 1.15rem;
+        font-size: 1.18rem;
     }
 
     .track-bus-title {
-        font-size: 0.96rem;
-        max-width: 125px;
+        font-size: 0.98rem;
+        max-width: 130px;
+    }
+
+    /* On mobile phones, hide username text to keep user badge compact & neat */
+    .user-nav-badge .user-nav-username {
+        display: none !important;
+    }
+
+    .user-nav-badge {
+        height: 38px;
+        padding: 0 5px;
+        gap: 4px;
     }
 
     .transit-preview-card .sound-pills-row {
@@ -5033,14 +5117,32 @@ button {
     }
 
     .app-transit-nav-right {
-        gap: 4px;
+        gap: 5px;
     }
 
     .btn-transit-back,
-    .app-transit-header .icon-round-btn,
+    .header-action-btn,
+    .nav-action-btn,
     .app-transit-header .btn-theme-toggle {
-        width: 32px;
-        height: 32px;
+        width: 34px;
+        height: 34px;
+        font-size: 0.92rem;
+    }
+
+    .user-nav-badge {
+        height: 34px;
+        padding: 0 4px;
+    }
+
+    .user-nav-badge .user-avatar-initial {
+        width: 26px;
+        height: 26px;
+        font-size: 0.76rem;
+    }
+
+    .user-nav-badge .btn-sign-out {
+        width: 24px;
+        height: 24px;
     }
 
     .mobile-tab-btn {
