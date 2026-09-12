@@ -10,13 +10,13 @@ class GeoWakeApp {
         this.liveUserPosition = null;
 
         this.currentTrip = {
-            destinationName: 'Ranchi Railway Station (RNC)',
-            destinationFullName: 'Ranchi Junction Railway Station, Station Rd, Gosaintola, Ranchi, Jharkhand 834001',
-            destLat: 23.3518,
-            destLon: 85.3378,
-            originName: 'Hatia Railway Station',
-            originLat: 23.3039,
-            originLon: 85.3149,
+            destinationName: null,
+            destinationFullName: null,
+            destLat: null,
+            destLon: null,
+            originName: 'Current Location',
+            originLat: 23.3441,
+            originLon: 85.3096,
             alertRadius: 500, // meters
             alarmSound: 'loud',
             vibration: true,
@@ -110,10 +110,12 @@ class GeoWakeApp {
 
         // Link Trip Simulator
         if (window.tripSimulator) {
-            window.tripSimulator.setRoute(
-                { name: this.currentTrip.originName, lat: this.currentTrip.originLat, lon: this.currentTrip.originLon },
-                { name: this.currentTrip.destinationName, lat: this.currentTrip.destLat, lon: this.currentTrip.destLon }
-            );
+            if (this.currentTrip.destLat && this.currentTrip.destLon) {
+                window.tripSimulator.setRoute(
+                    { name: this.currentTrip.originName, lat: this.currentTrip.originLat, lon: this.currentTrip.originLon },
+                    { name: this.currentTrip.destinationName, lat: this.currentTrip.destLat, lon: this.currentTrip.destLon }
+                );
+            }
 
             window.tripSimulator.onLocationUpdate((sample) => {
                 this.handleLocationSample(sample);
@@ -186,7 +188,9 @@ class GeoWakeApp {
             this.handleUserLocationDrag(lat, lon, isFinal);
         });
 
-        this.updateSuitableRouteAndEta();
+        if (this.currentTrip.destLat && this.currentTrip.destLon) {
+            this.updateSuitableRouteAndEta();
+        }
     }
 
     async updateSuitableRouteAndEta() {

@@ -22,7 +22,7 @@
     <script src="js/theme.js"></script>
 
     <!-- Custom CSS (Transit Theme) -->
-    <link rel="stylesheet" href="style.css?v=2.8">
+    <link rel="stylesheet" href="style.css?v=2.9">
 </head>
 <body>
 
@@ -421,10 +421,10 @@
                         </div>
 
                         <!-- Selected Destination Card -->
-                        <div class="selected-dest-card" id="selected-dest-card">
+                        <div class="selected-dest-card hidden" id="selected-dest-card">
                             <div class="dest-details">
-                                <div class="dest-name" id="current-dest-name">Bernard Pub (Prague)</div>
-                                <div class="dest-coords" id="current-dest-coords">23.35180, 85.33780</div>
+                                <div class="dest-name" id="current-dest-name">--</div>
+                                <div class="dest-coords" id="current-dest-coords">--</div>
                             </div>
                             <div class="dest-actions-wrap">
                                 <button id="btn-remove-dest" class="btn-remove-dest" title="Remove Destination">
@@ -434,7 +434,7 @@
                         </div>
 
                         <!-- Travel Path & ETA Ticket Summary Card -->
-                        <div class="travel-path-summary-card" id="travel-path-summary-card">
+                        <div class="travel-path-summary-card hidden" id="travel-path-summary-card">
                             <div class="path-summary-header">
                                 <span class="path-title"><i class="fas fa-route" style="color: var(--accent-primary);"></i> Route Summary</span>
                                 <span class="badge badge-cyan" id="path-routing-status"><i class="fas fa-compass"></i> Route Active</span>
@@ -442,21 +442,21 @@
                             <div class="path-summary-grid">
                                 <div class="path-summary-item">
                                     <span class="item-lbl">Distance</span>
-                                    <span class="item-val" id="path-distance-val">15 km</span>
+                                    <span class="item-val" id="path-distance-val">-- km</span>
                                 </div>
                                 <div class="path-summary-item">
                                     <span class="item-lbl">Travel Time</span>
-                                    <span class="item-val highlight" id="path-duration-val">15 min</span>
+                                    <span class="item-val highlight" id="path-duration-val">-- min</span>
                                 </div>
                                 <div class="path-summary-item">
                                     <span class="item-lbl">Est. Arrival</span>
-                                    <span class="item-val" id="path-eta-val">16:25</span>
+                                    <span class="item-val" id="path-eta-val">--</span>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Empty Destination State -->
-                        <div class="no-dest-card hidden" id="no-dest-card">
+                        <div class="no-dest-card" id="no-dest-card">
                             <i class="fas fa-map-pin" style="color: var(--text-muted); font-size: 1.2rem;"></i>
                             <div class="no-dest-info">
                                 <div class="no-dest-title">No Destination Selected</div>
@@ -602,11 +602,11 @@
                         </div>
 
                         <!-- Floating Route Stats Pill (Matches Screenshot Top Badge) -->
-                        <div class="map-floating-route-badge" id="map-route-badge">
+                        <div class="map-floating-route-badge hidden" id="map-route-badge">
                             <i class="fas fa-bus" style="color: var(--accent-primary);"></i>
-                            <span>Time: <strong id="map-badge-time">15 min</strong></span>
+                            <span>Time: <strong id="map-badge-time">-- min</strong></span>
                             <span class="route-badge-divider">•</span>
-                            <span id="map-badge-dist">15 km</span>
+                            <span id="map-badge-dist">-- km</span>
                         </div>
 
                         <!-- Floating Action Buttons -->
@@ -640,8 +640,8 @@
                                 <div class="mobile-floating-dest-wrap">
                                     <div class="mobile-floating-dest-icon"><i class="fas fa-location-dot"></i></div>
                                     <div class="mobile-floating-dest-text">
-                                        <span class="mobile-floating-dest-name" id="mobile-float-dest-name">Bernard Pub (Prague)</span>
-                                        <span class="mobile-floating-eta" id="mobile-float-eta">15 km • ~15 min</span>
+                                        <span class="mobile-floating-dest-name" id="mobile-float-dest-name">No destination chosen</span>
+                                        <span class="mobile-floating-eta" id="mobile-float-eta">Click map or search</span>
                                     </div>
                                 </div>
                             </div>
@@ -880,7 +880,7 @@
             <div class="alarm-icon-beacon"><i class="fas fa-bell"></i></div>
             <div class="alarm-title">WAKE UP!</div>
             <div style="font-size: 1rem; color: var(--text-secondary); margin-bottom: 4px;">You have arrived near:</div>
-            <div class="alarm-destination-name" id="alarm-dest-name">Bernard Pub (Prague)</div>
+            <div class="alarm-destination-name" id="alarm-dest-name">Your Destination</div>
             <div class="alarm-dist-caption" id="alarm-dest-distance">Within 500 meters of destination</div>
             
             <div class="alarm-modal-actions">
@@ -899,14 +899,14 @@
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
-    <!-- Scripts (v2.8 Map Search Bar & Destination Finder) -->
-    <script src="js/audio.js?v=2.8"></script>
-    <script src="js/cloud-db.js?v=2.8"></script>
-    <script src="js/auth.js?v=2.8"></script>
-    <script src="js/telemetry.js?v=2.8"></script>
-    <script src="js/geolocation.js?v=2.8"></script>
-    <script src="js/map.js?v=2.8"></script>
-    <script src="js/simulator.js?v=2.8"></script>
-    <script src="js/app.js?v=2.8"></script>
+    <!-- Scripts (v2.9 Clean State: No Autoselected Destination) -->
+    <script src="js/audio.js?v=2.9"></script>
+    <script src="js/cloud-db.js?v=2.9"></script>
+    <script src="js/auth.js?v=2.9"></script>
+    <script src="js/telemetry.js?v=2.9"></script>
+    <script src="js/geolocation.js?v=2.9"></script>
+    <script src="js/map.js?v=2.9"></script>
+    <script src="js/simulator.js?v=2.9"></script>
+    <script src="js/app.js?v=2.9"></script>
 </body>
 </html>

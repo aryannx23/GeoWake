@@ -15,14 +15,10 @@ class TripSimulator {
         // Current route points
         this.origin = {
             name: 'Current Origin',
-            lat: 12.9716,
-            lon: 77.5946
+            lat: 23.3441,
+            lon: 85.3096
         };
-        this.destination = {
-            name: 'KSR Bengaluru Railway Station',
-            lat: 12.9776,
-            lon: 77.5706
-        };
+        this.destination = null;
 
         this.currentLat = this.origin.lat;
         this.currentLon = this.origin.lon;
@@ -53,6 +49,7 @@ class TripSimulator {
     }
 
     start() {
+        if (!this.destination) return;
         if (this.isRunning) return;
         this.isRunning = true;
         this.tick();
